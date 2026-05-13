@@ -144,7 +144,7 @@ async function asignarMenu(menId: number) {
     try {
         await api.post('/programacion-academica/rol-menu', {
             rol_id: Number(selectedRolId.value),
-            men_id: menId,
+            men_id: Number(menId),
         })
         formSuccess.value = 'Menu asignado exitosamente'
         await loadMenusRol()

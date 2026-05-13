@@ -5,6 +5,17 @@ export interface LoginRequest {
   usu_contrasenia: string;
 }
 
+export interface SelectRolRequest {
+  usu_id: number;
+  rol_id: number;
+}
+
+export interface RolResponse {
+  rol_id: number;
+  rol_nombre: string;
+  rol_descripcion?: string;
+}
+
 export interface MenuResponse {
   men_id: number;
   men_nombre: string;
@@ -14,29 +25,27 @@ export interface MenuResponse {
   men_padre_id: number | null;
 }
 
-export interface RolResponse {
-  rol_id: number;
-  rol_nombre: string;
-}
-
-export interface UsuarioResponse {
-  usu_id: number;
-  usu_identificacion: string;
-  usu_nombres: string;
-  usu_apellidos: string;
-  usu_usuario: string;
-  roles: RolResponse[];
-  menus: MenuResponse[];
-}
-
-export interface LoginResponse {
+export interface ValidateResponse {
   message: string;
-  token: string;
-  usuario: UsuarioResponse;
+  requires_role_selection: boolean;
+  token?: string;
+  usuario?: {
+    usu_id: number;
+    usu_identificacion: string;
+    usu_nombres: string;
+    usu_apellidos: string;
+    usu_usuario: string;
+    rol: RolResponse;
+    menus: MenuResponse[];
+  };
+  roles?: RolResponse[];
 }
 
 export const authApi = {
-  login(data: LoginRequest) {
-    return api.post<LoginResponse>("/login", data);
+  validate(data: LoginRequest) {
+    return api.post<ValidateResponse>("/login/validate", data);
+  },
+  selectRol(data: SelectRolRequest) {
+    return api.post<ValidateResponse>("/login/select-rol", data);
   },
 };

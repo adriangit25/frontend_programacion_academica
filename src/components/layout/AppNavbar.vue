@@ -8,7 +8,7 @@
         <div class="flex items-center gap-4">
             <div class="text-right">
                 <p class="text-sm font-medium text-gray-700">{{ authStore.nombreCompleto }}</p>
-                <p class="text-xs text-gray-500">{{ authStore.usuario?.roles?.[0]?.rol_nombre }}</p>
+                <p class="text-xs text-gray-500">{{ authStore.usuario?.rol?.rol_nombre }}</p>
             </div>
 
             <button @click="authStore.logout()"
