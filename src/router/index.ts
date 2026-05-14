@@ -93,6 +93,13 @@ const router = createRouter({
           component: () => import("../views/docentes/DocentesListView.vue"),
           meta: { title: "Docentes", requiresAuth: true },
         },
+        {
+          path: "planes-estudio",
+          name: "planes-estudio",
+          component: () =>
+            import("../views/planes-estudio/PlanesEstudioView.vue"),
+          meta: { title: "Planes de Estudio", requiresAuth: true },
+        },
       ],
     },
   ],
