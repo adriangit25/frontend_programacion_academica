@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-800">Carreras</h1>
-        <p class="text-gray-500 text-sm mt-1">Gestion de carreras academicas</p>
+        <p class="text-gray-500 text-sm mt-1">{{ isCoordinador ? 'Carreras de su escuela' : 'Gestion de carreras academicas' }}</p>
       </div>
       <button @click="openModal()" class="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
         <i class="pi pi-plus"></i>
@@ -92,12 +92,15 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Escuela</label>
-            <select v-model.number="form.esc_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
-              <option value="">-- Seleccione una escuela --</option>
+            <select v-if="isAdmin" v-model.number="form.esc_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+              <option value="0">-- Seleccione una escuela --</option>
               <option v-for="escuela in escuelas" :key="escuela.esc_id" :value="escuela.esc_id">
                 {{ escuela.esc_nombre }}
               </option>
             </select>
+            <div v-else class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700">
+              {{ miEscuela?.esc_nombre || 'No tiene escuela asignada' }}
+            </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
@@ -139,9 +142,14 @@ import { carrerasApi } from '../../api/carreras.api'
 import { escuelasApi } from '../../api/escuelas.api'
 import type { Carrera, CreateCarreraRequest } from '../../api/carreras.api'
 import type { Escuela } from '../../api/escuelas.api'
+import { useRole } from '../../composables/useRole'
+import api from '../../api/axios'
+
+const { isAdmin, isCoordinador, usuarioId } = useRole()
 
 const carreras = ref<Carrera[]>([])
 const escuelas = ref<Escuela[]>([])
+const miEscuela = ref<Escuela | null>(null)
 const loading = ref(false)
 const saving = ref(false)
 const showModal = ref(false)
@@ -162,12 +170,23 @@ const form = reactive<CreateCarreraRequest>({
 onMounted(async () => {
   loading.value = true
   try {
-    const [carrerasRes, escuelasRes] = await Promise.all([
-      carrerasApi.getAll(),
-      escuelasApi.getAll(),
-    ])
-    carreras.value = carrerasRes.data
-    escuelas.value = escuelasRes.data
+    if (isCoordinador.value) {
+      // Cargar escuela del coordinador
+      const escuelaRes = await api.get(`/programacion-academica/coordinador/${usuarioId.value}/escuela`)
+      if (escuelaRes.data.length > 0) {
+        miEscuela.value = escuelaRes.data[0]
+        // Cargar carreras de esa escuela
+        const carrerasRes = await api.get(`/programacion-academica/escuelas/${miEscuela.value!.esc_id}/carreras`)
+        carreras.value = carrerasRes.data
+      }
+    } else {
+      const [carrerasRes, escuelasRes] = await Promise.all([
+        carrerasApi.getAll(),
+        escuelasApi.getAll(),
+      ])
+      carreras.value = carrerasRes.data
+      escuelas.value = escuelasRes.data
+    }
   } catch (error) {
     console.error('Error cargando datos:', error)
   } finally {
@@ -177,8 +196,13 @@ onMounted(async () => {
 
 async function loadCarreras() {
   try {
-    const response = await carrerasApi.getAll()
-    carreras.value = response.data
+    if (isCoordinador.value && miEscuela.value) {
+      const response = await api.get(`/programacion-academica/escuelas/${miEscuela.value.esc_id}/carreras`)
+      carreras.value = response.data
+    } else {
+      const response = await carrerasApi.getAll()
+      carreras.value = response.data
+    }
   } catch (error) {
     console.error('Error cargando carreras:', error)
   }
@@ -200,7 +224,7 @@ function openModal(carrera?: Carrera) {
     form.car_nombre = ''
     form.car_modalidad = 'Presencial'
     form.car_descripcion = ''
-    form.esc_id = 0
+    form.esc_id = isCoordinador.value && miEscuela.value ? Number(miEscuela.value.esc_id) : 0
     form.car_estado = true
   }
   showModal.value = true
@@ -212,8 +236,17 @@ function closeModal() {
 }
 
 async function handleSubmit() {
-  if (!form.car_codigo || !form.car_nombre || !form.esc_id) {
-    formError.value = 'El codigo, nombre y escuela son obligatorios'
+  if (!form.car_codigo || !form.car_nombre) {
+    formError.value = 'El codigo y nombre son obligatorios'
+    return
+  }
+
+  if (isCoordinador.value && miEscuela.value) {
+    form.esc_id = Number(miEscuela.value.esc_id)
+  }
+
+  if (!form.esc_id) {
+    formError.value = 'La escuela es obligatoria'
     return
   }
 
@@ -224,7 +257,12 @@ async function handleSubmit() {
     if (editingCarrera.value) {
       await carrerasApi.update(editingCarrera.value.car_id, form)
     } else {
-      await carrerasApi.create(form)
+      // Si es coordinador, enviar usuId para auto-asignarse
+      if (isCoordinador.value) {
+        await api.post(`/programacion-academica/carreras?usuId=${usuarioId.value}`, form)
+      } else {
+        await carrerasApi.create(form)
+      }
     }
     closeModal()
     await loadCarreras()

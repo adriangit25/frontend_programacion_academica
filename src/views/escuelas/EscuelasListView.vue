@@ -3,9 +3,9 @@
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-800">Escuelas</h1>
-        <p class="text-gray-500 text-sm mt-1">Gestion de escuelas academicas</p>
+        <p class="text-gray-500 text-sm mt-1">{{ isCoordinador ? 'Escuela asignada' : 'Gestion de escuelas academicas' }}</p>
       </div>
-      <button @click="openModal()" class="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+      <button v-if="isAdmin" @click="openModal()" class="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
         <i class="pi pi-plus"></i>
         Nueva Escuela
       </button>
@@ -20,15 +20,15 @@
             <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Nombre</th>
             <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Descripcion</th>
             <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Estado</th>
-            <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Acciones</th>
+            <th v-if="isAdmin" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr v-if="loading" class="text-center">
-            <td colspan="6" class="px-6 py-8 text-gray-400">Cargando...</td>
+            <td :colspan="isAdmin ? 6 : 5" class="px-6 py-8 text-gray-400">Cargando...</td>
           </tr>
           <tr v-else-if="escuelas.length === 0" class="text-center">
-            <td colspan="6" class="px-6 py-8 text-gray-400">No hay escuelas registradas</td>
+            <td :colspan="isAdmin ? 6 : 5" class="px-6 py-8 text-gray-400">No hay escuelas registradas</td>
           </tr>
           <tr v-for="escuela in escuelas" :key="escuela.esc_id" class="hover:bg-gray-50 transition">
             <td class="px-6 py-4 text-sm text-gray-700">{{ escuela.esc_id }}</td>
@@ -36,11 +36,9 @@
             <td class="px-6 py-4 text-sm text-gray-700">{{ escuela.esc_nombre }}</td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ escuela.esc_descripcion || '-' }}</td>
             <td class="px-6 py-4">
-              <span :class="['px-2 py-1 rounded-full text-xs font-medium', escuela.esc_estado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
-                {{ escuela.esc_estado ? 'Activo' : 'Inactivo' }}
-              </span>
+              <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Activo</span>
             </td>
-            <td class="px-6 py-4">
+            <td v-if="isAdmin" class="px-6 py-4">
               <div class="flex items-center gap-2">
                 <button @click="openModal(escuela)" class="text-blue-600 hover:text-blue-800 transition">
                   <i class="pi pi-pencil text-sm"></i>
@@ -55,8 +53,8 @@
       </table>
     </div>
 
-    <!-- Modal Crear/Editar -->
-    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <!-- Modal Crear/Editar (solo admin) -->
+    <div v-if="showModal && isAdmin" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-gray-800">{{ editingEscuela ? 'Editar Escuela' : 'Nueva Escuela' }}</h2>
@@ -116,6 +114,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { escuelasApi } from '../../api/escuelas.api'
 import type { Escuela, CreateEscuelaRequest } from '../../api/escuelas.api'
+import { useRole } from '../../composables/useRole'
+import api from '../../api/axios'
+
+const { isAdmin, isCoordinador, usuarioId } = useRole()
 
 const escuelas = ref<Escuela[]>([])
 const loading = ref(false)
@@ -138,8 +140,13 @@ onMounted(() => { loadEscuelas() })
 async function loadEscuelas() {
   loading.value = true
   try {
-    const response = await escuelasApi.getAll()
-    escuelas.value = response.data
+    if (isCoordinador.value) {
+      const response = await api.get(`/programacion-academica/coordinador/${usuarioId.value}/escuela`)
+      escuelas.value = response.data
+    } else {
+      const response = await escuelasApi.getAll()
+      escuelas.value = response.data
+    }
   } catch (error) {
     console.error('Error cargando escuelas:', error)
   } finally {

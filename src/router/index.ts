@@ -74,6 +74,25 @@ const router = createRouter({
             import("../views/areas-conocimiento/AreasConocimientoListView.vue"),
           meta: { title: "Areas de Conocimiento", requiresAuth: true },
         },
+        {
+          path: "coordinadores",
+          name: "coordinadores",
+          component: () =>
+            import("../views/coordinadores/CoordinadoresView.vue"),
+          meta: { title: "Coordinadores", requiresAuth: true },
+        },
+        {
+          path: "aulas",
+          name: "aulas",
+          component: () => import("../views/aulas/AulasListView.vue"),
+          meta: { title: "Aulas", requiresAuth: true },
+        },
+        {
+          path: "docentes",
+          name: "docentes",
+          component: () => import("../views/docentes/DocentesListView.vue"),
+          meta: { title: "Docentes", requiresAuth: true },
+        },
       ],
     },
   ],
