@@ -90,7 +90,7 @@
                   <th class="text-left px-4 py-2 text-xs font-semibold text-gray-500 uppercase">H. Practicas</th>
                   <th class="text-left px-4 py-2 text-xs font-semibold text-gray-500 uppercase">H. Autonomas</th>
                   <th class="text-left px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Total</th>
-                  <th class="text-left px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Est.</th>
+                  <th class="text-left px-4 py-2 text-xs font-semibold text-gray-500 uppercase">H/Semana</th>
                   <th class="text-left px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Acciones</th>
                 </tr>
               </thead>
@@ -103,7 +103,12 @@
                   <td class="px-4 py-3 text-sm text-gray-700">{{ materia.mat_horas_practicas }}</td>
                   <td class="px-4 py-3 text-sm text-gray-700">{{ materia.mat_horas_autonomas }}</td>
                   <td class="px-4 py-3 text-sm font-medium text-gray-800">{{ materia.mat_total_horas }}</td>
-                  <td class="px-4 py-3 text-sm text-gray-700">{{ materia.mat_estudiantes_estimado }}</td>
+                  <td class="px-4 py-3 text-xs text-gray-600">
+                    D: {{ (materia.mat_horas_docencia / 16).toFixed(1) }} |
+                    P: {{ (materia.mat_horas_practicas / 16).toFixed(1) }} |
+                    A: {{ (materia.mat_horas_autonomas / 16).toFixed(1) }}
+                  </td>
+                  
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
                       <button @click="openMateriaModal(materia)" class="text-blue-600 hover:text-blue-800 transition">
@@ -222,14 +227,10 @@
               <input v-model.number="materiaForm.mat_horas_autonomas" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Total Horas</label>
-              <input v-model.number="materiaForm.mat_total_horas" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Estudiantes Estimados</label>
-              <input v-model.number="materiaForm.mat_estudiantes_estimado" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Total Horas</label>
+            <div class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 font-medium">
+              {{ totalHorasCalculado }}
             </div>
           </div>
         </div>
@@ -345,6 +346,10 @@ const materiaForm = reactive<CreateMateriaRequest>({
   pln_id: 0,
   arc_id: 0,
   mat_estado: true,
+})
+
+const totalHorasCalculado = computed(() => {
+  return (materiaForm.mat_horas_docencia || 0) + (materiaForm.mat_horas_practicas || 0) + (materiaForm.mat_horas_autonomas || 0)
 })
 
 const nivelesConMaterias = computed(() => {
@@ -529,6 +534,8 @@ async function handleSubmitMateria() {
   }
 
   materiaForm.pln_id = Number(selectedPlan.value?.pln_id) || 0
+  materiaForm.mat_total_horas = totalHorasCalculado.value
+  materiaForm.mat_estudiantes_estimado = 0
 
   saving.value = true
   materiaError.value = ''
