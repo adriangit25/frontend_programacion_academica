@@ -100,6 +100,18 @@ const router = createRouter({
             import("../views/planes-estudio/PlanesEstudioView.vue"),
           meta: { title: "Planes de Estudio", requiresAuth: true },
         },
+        {
+          path: "periodos",
+          name: "periodos",
+          component: () => import("../views/periodos/PeriodosListView.vue"),
+          meta: { title: "Periodos Academicos", requiresAuth: true },
+        },
+        {
+          path: "paralelos",
+          name: "paralelos",
+          component: () => import("../views/paralelos/ParalelosListView.vue"),
+          meta: { title: "Paralelos", requiresAuth: true },
+        },
       ],
     },
   ],

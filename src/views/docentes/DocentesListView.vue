@@ -16,41 +16,53 @@
         <table class="w-full">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">ID</th>
-              <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Identificacion</th>
-              <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Nombre Completo</th>
-              <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Dedicacion</th>
-              <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Contrato</th>
-              <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Horas</th>
-              <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Estado</th>
-              <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Acciones</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">No.</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Apellidos y Nombres</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Identificacion</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Titulo Grado</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Titulo Posgrado</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Dedicacion</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Contrato</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Horas Min</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Horas Max</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Areas</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr v-if="loading" class="text-center">
-              <td colspan="8" class="px-6 py-8 text-gray-400">Cargando...</td>
+              <td colspan="11" class="px-4 py-8 text-gray-400">Cargando...</td>
             </tr>
             <tr v-else-if="docentes.length === 0" class="text-center">
-              <td colspan="8" class="px-6 py-8 text-gray-400">No hay docentes registrados</td>
+              <td colspan="11" class="px-4 py-8 text-gray-400">No hay docentes registrados</td>
             </tr>
-            <tr v-for="docente in docentes" :key="docente.doc_id" class="hover:bg-gray-50 transition">
-              <td class="px-6 py-4 text-sm text-gray-700">{{ docente.doc_id }}</td>
-              <td class="px-6 py-4 text-sm text-gray-700">{{ docente.usu_identificacion }}</td>
-              <td class="px-6 py-4 text-sm text-gray-700">{{ docente.usu_apellidos }} {{ docente.usu_nombres }}</td>
-              <td class="px-6 py-4 text-sm text-gray-700">{{ docente.doc_dedicacion }}</td>
-              <td class="px-6 py-4 text-sm text-gray-500">{{ docente.doc_tipo_contrato || '-' }}</td>
-              <td class="px-6 py-4 text-sm text-gray-700">{{ docente.doc_horas_minimas }} - {{ docente.doc_horas_maximas }}</td>
-              <td class="px-6 py-4">
-                <span :class="['px-2 py-1 rounded-full text-xs font-medium', docente.doc_estado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
-                  {{ docente.doc_estado ? 'Activo' : 'Inactivo' }}
-                </span>
+            <tr v-for="(docente, index) in docentes" :key="docente.doc_id" class="hover:bg-gray-50 transition">
+              <td class="px-4 py-3 text-sm text-gray-700">{{ index + 1 }}</td>
+              <td class="px-4 py-3 text-sm text-gray-700 font-medium">{{ docente.usu_apellidos }} {{ docente.usu_nombres }}</td>
+              <td class="px-4 py-3 text-sm text-gray-500">{{ docente.usu_identificacion }}</td>
+              <td class="px-4 py-3 text-sm text-gray-500">{{ docente.doc_titulo_grado || '-' }}</td>
+              <td class="px-4 py-3 text-sm text-gray-500">{{ docente.doc_titulo_posgrado || '-' }}</td>
+              <td class="px-4 py-3 text-sm text-gray-700">{{ docente.doc_dedicacion }}</td>
+              <td class="px-4 py-3 text-sm text-gray-500">{{ docente.doc_tipo_contrato || '-' }}</td>
+              <td class="px-4 py-3 text-sm text-gray-700">{{ docente.doc_horas_minimas }}</td>
+              <td class="px-4 py-3 text-sm text-gray-700">{{ docente.doc_horas_maximas }}</td>
+              <td class="px-4 py-3">
+                <div class="flex flex-wrap gap-1">
+                  <span v-if="!docenteAreas[docente.doc_id] || docenteAreas[docente.doc_id].length === 0" class="text-xs text-gray-400">Sin areas</span>
+                  <span v-for="area in docenteAreas[docente.doc_id]" :key="area.arc_id" class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs">
+                    {{ area.arc_nombre }}
+                  </span>
+                </div>
               </td>
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
-                  <button @click="openModal(docente)" class="text-blue-600 hover:text-blue-800 transition">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-1">
+                  <button @click="openModal(docente)" class="text-blue-600 hover:text-blue-800 transition" title="Editar">
                     <i class="pi pi-pencil text-sm"></i>
                   </button>
-                  <button @click="confirmDelete(docente)" class="text-red-600 hover:text-red-800 transition">
+                  <button @click="openAreaModal(docente)" class="text-green-600 hover:text-green-800 transition" title="Asignar areas">
+                    <i class="pi pi-tags text-sm"></i>
+                  </button>
+                  <button @click="confirmDelete(docente)" class="text-red-600 hover:text-red-800 transition" title="Eliminar">
                     <i class="pi pi-trash text-sm"></i>
                   </button>
                 </div>
@@ -61,7 +73,7 @@
       </div>
     </div>
 
-    <!-- Modal Crear/Editar -->
+    <!-- Modal Crear/Editar Docente -->
     <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
@@ -81,7 +93,7 @@
             <select v-model.number="form.usu_id" :disabled="!!editingDocente" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm disabled:bg-gray-100">
               <option value="0">-- Seleccione un usuario --</option>
               <option v-for="usuario in usuarios" :key="usuario.usu_id" :value="usuario.usu_id">
-                {{ usuario.usu_nombres }} {{ usuario.usu_apellidos }} ({{ usuario.usu_identificacion }})
+                {{ usuario.usu_apellidos }} {{ usuario.usu_nombres }} ({{ usuario.usu_identificacion }})
               </option>
             </select>
           </div>
@@ -97,21 +109,21 @@
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
-              <select v-model="form.doc_tipo_contrato" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
-                <option value="">-- Seleccione --</option>
-                <option value="Titular">Titular</option>
-                <option value="Ocasional">Ocasional</option>
-                <option value="Invitado">Invitado</option>
-              </select>
-            </div>
-            <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Dedicacion</label>
               <select v-model="form.doc_dedicacion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
                 <option value="">-- Seleccione --</option>
                 <option value="Tiempo Completo">Tiempo Completo</option>
                 <option value="Medio Tiempo">Medio Tiempo</option>
                 <option value="Tiempo Parcial">Tiempo Parcial</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato</label>
+              <select v-model="form.doc_tipo_contrato" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+                <option value="">-- Seleccione --</option>
+                <option value="Titular">Titular</option>
+                <option value="Ocasional">Ocasional</option>
+                <option value="Invitado">Invitado</option>
               </select>
             </div>
           </div>
@@ -155,6 +167,52 @@
       </div>
     </div>
 
+    <!-- Modal Asignar Areas -->
+    <div v-if="showAreaModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-800">Areas de {{ selectedDocente?.usu_apellidos }} {{ selectedDocente?.usu_nombres }}</h2>
+          <button @click="showAreaModal = false" class="text-gray-400 hover:text-gray-600">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div v-if="areaError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+          {{ areaError }}
+        </div>
+
+        <div v-if="areaSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm">
+          {{ areaSuccess }}
+        </div>
+
+        <!-- Areas asignadas -->
+        <div class="mb-4">
+          <h3 class="text-sm font-medium text-gray-700 mb-2">Areas asignadas</h3>
+          <div v-if="areasDelDocente.length === 0" class="text-gray-400 text-sm">No tiene areas asignadas</div>
+          <div v-else class="flex flex-wrap gap-2">
+            <span v-for="area in areasDelDocente" :key="area.arc_id" class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm flex items-center gap-1">
+              <i class="pi pi-check-circle text-xs"></i>
+              {{ area.arc_nombre }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Areas disponibles -->
+        <div>
+          <h3 class="text-sm font-medium text-gray-700 mb-2">Asignar nueva area</h3>
+          <div v-if="areasDisponibles.length === 0" class="text-gray-400 text-sm">Ya tiene todas las areas asignadas</div>
+          <div v-else class="space-y-2">
+            <div v-for="area in areasDisponibles" :key="area.arc_id" class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-4 py-2">
+              <span class="text-sm text-gray-700">{{ area.arc_nombre }}</span>
+              <button @click="assignArea(area.arc_id)" :disabled="savingArea" class="px-3 py-1 bg-blue-900 text-white rounded-lg text-xs hover:bg-blue-800 transition disabled:opacity-50">
+                {{ savingArea ? '...' : 'Asignar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal Confirmar Eliminar -->
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
@@ -175,13 +233,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { docentesApi } from '../../api/docentes.api'
 import { usuariosApi } from '../../api/usuarios.api'
 import { escuelasApi } from '../../api/escuelas.api'
+import { areasConocimientoApi } from '../../api/areas-conocimiento.api'
 import type { Docente, CreateDocenteRequest } from '../../api/docentes.api'
 import type { Usuario } from '../../api/usuarios.api'
 import type { Escuela } from '../../api/escuelas.api'
+import type { AreaConocimiento } from '../../api/areas-conocimiento.api'
 import { useRole } from '../../composables/useRole'
 import api from '../../api/axios'
 
@@ -190,7 +250,10 @@ const { isAdmin, isCoordinador, usuarioId } = useRole()
 const docentes = ref<Docente[]>([])
 const usuarios = ref<Usuario[]>([])
 const escuelas = ref<Escuela[]>([])
+const todasLasAreas = ref<AreaConocimiento[]>([])
 const miEscuela = ref<Escuela | null>(null)
+const docenteAreas = ref<Record<number, { arc_id: number; arc_nombre: string }[]>>({})
+
 const loading = ref(false)
 const saving = ref(false)
 const showModal = ref(false)
@@ -198,6 +261,19 @@ const showDeleteModal = ref(false)
 const formError = ref('')
 const editingDocente = ref<Docente | null>(null)
 const deletingDocente = ref<Docente | null>(null)
+
+// Areas modal
+const showAreaModal = ref(false)
+const selectedDocente = ref<Docente | null>(null)
+const areasDelDocente = ref<{ arc_id: number; arc_nombre: string }[]>([])
+const savingArea = ref(false)
+const areaError = ref('')
+const areaSuccess = ref('')
+
+const areasDisponibles = computed(() => {
+  const idsAsignados = areasDelDocente.value.map(a => String(a.arc_id))
+  return todasLasAreas.value.filter(a => !idsAsignados.includes(String(a.arc_id)) && a.arc_estado)
+})
 
 const form = reactive<CreateDocenteRequest>({
   usu_id: 0,
@@ -222,23 +298,43 @@ onMounted(async () => {
       const escuelaRes = await api.get(`/programacion-academica/coordinador/${usuarioId.value}/escuela`)
       if (escuelaRes.data.length > 0) {
         miEscuela.value = escuelaRes.data[0]
-        const docentesRes = await docentesApi.getByEscuela(Number(miEscuela.value!.esc_id))
+        const [docentesRes, areasRes] = await Promise.all([
+          docentesApi.getByEscuela(Number(miEscuela.value!.esc_id)),
+          areasConocimientoApi.getByEscuela(Number(miEscuela.value!.esc_id)),
+        ])
         docentes.value = docentesRes.data
+        todasLasAreas.value = areasRes.data
       }
     } else {
-      const [docentesRes, escuelasRes] = await Promise.all([
+      const [docentesRes, escuelasRes, areasRes] = await Promise.all([
         docentesApi.getAll(),
         escuelasApi.getAll(),
+        areasConocimientoApi.getAll(),
       ])
       docentes.value = docentesRes.data
       escuelas.value = escuelasRes.data
+      todasLasAreas.value = areasRes.data
     }
+
+    // Cargar areas de cada docente
+    await loadAllDocenteAreas()
   } catch (error) {
     console.error('Error cargando datos:', error)
   } finally {
     loading.value = false
   }
 })
+
+async function loadAllDocenteAreas() {
+  for (const docente of docentes.value) {
+    try {
+      const res = await api.get(`/programacion-academica/docentes/${docente.doc_id}/areas`)
+      docenteAreas.value[docente.doc_id] = res.data
+    } catch {
+      docenteAreas.value[docente.doc_id] = []
+    }
+  }
+}
 
 async function loadDocentes() {
   try {
@@ -249,6 +345,7 @@ async function loadDocentes() {
       const response = await docentesApi.getAll()
       docentes.value = response.data
     }
+    await loadAllDocenteAreas()
   } catch (error) {
     console.error('Error cargando docentes:', error)
   }
@@ -319,6 +416,45 @@ async function handleSubmit() {
     formError.value = err.response?.data?.message || 'Error al guardar'
   } finally {
     saving.value = false
+  }
+}
+
+// ==================== AREAS ====================
+
+async function openAreaModal(docente: Docente) {
+  selectedDocente.value = docente
+  areaError.value = ''
+  areaSuccess.value = ''
+  showAreaModal.value = true
+
+  try {
+    const res = await api.get(`/programacion-academica/docentes/${docente.doc_id}/areas`)
+    areasDelDocente.value = res.data
+  } catch {
+    areasDelDocente.value = []
+  }
+}
+
+async function assignArea(arcId: number) {
+  if (!selectedDocente.value) return
+
+  savingArea.value = true
+  areaError.value = ''
+  areaSuccess.value = ''
+
+  try {
+    await api.post('/programacion-academica/docente-area', {
+      doc_id: Number(selectedDocente.value.doc_id),
+      arc_id: Number(arcId),
+    })
+    areaSuccess.value = 'Area asignada exitosamente'
+    const res = await api.get(`/programacion-academica/docentes/${selectedDocente.value.doc_id}/areas`)
+    areasDelDocente.value = res.data
+    docenteAreas.value[selectedDocente.value.doc_id] = res.data
+  } catch (err: any) {
+    areaError.value = err.response?.data?.message || 'Error al asignar area'
+  } finally {
+    savingArea.value = false
   }
 }
 
