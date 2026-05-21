@@ -112,6 +112,12 @@ const router = createRouter({
           component: () => import("../views/paralelos/ParalelosListView.vue"),
           meta: { title: "Paralelos", requiresAuth: true },
         },
+        {
+          path: "programacion",
+          name: "programacion",
+          component: () => import("../views/programacion/ProgramacionView.vue"),
+          meta: { title: "Programacion Academica", requiresAuth: true },
+        },
       ],
     },
   ],
