@@ -118,6 +118,12 @@ const router = createRouter({
           component: () => import("../views/programacion/ProgramacionView.vue"),
           meta: { title: "Programacion Academica", requiresAuth: true },
         },
+        {
+          path: "horarios/generar",
+          name: "horarios-generar",
+          component: () => import("../views/horarios/HorariosView.vue"),
+          meta: { title: "Generar Horarios", requiresAuth: true },
+        },
       ],
     },
   ],
