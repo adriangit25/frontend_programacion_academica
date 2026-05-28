@@ -17,7 +17,7 @@
 
     <!-- Filtros -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Periodo</label>
           <select v-model.number="filters.per_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
@@ -38,13 +38,20 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
-          <select v-model.number="filters.nivel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
-            <option value="0">-- Todos --</option>
-            <option v-for="n in 10" :key="n" :value="n">Nivel {{ n }}</option>
+          <select v-model.number="filters.nivel" @change="onNivelChange" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+            <option value="0">-- Seleccione --</option>
+            <option v-for="n in nivelesDisponibles" :key="n" :value="n">Nivel {{ n }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Paralelo</label>
+          <select v-model="filters.paralelo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+            <option value="">-- Seleccione --</option>
+            <option v-for="par in paralelosDisponibles" :key="par" :value="par">{{ par }}</option>
           </select>
         </div>
         <div class="flex items-end">
-          <button @click="loadData" :disabled="!filters.per_id || !filters.car_id" class="w-full px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          <button @click="loadData" :disabled="!filters.per_id || !filters.car_id || !filters.nivel || !filters.paralelo" class="w-full px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
             Cargar
           </button>
         </div>
@@ -59,38 +66,51 @@
       </div>
       <div v-else class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse" style="table-layout: fixed;">
             <thead>
               <tr class="bg-blue-900 text-white">
-                <th class="px-3 py-3 text-xs font-semibold text-left border-r border-blue-800 w-20">HORA</th>
-                <th v-for="dia in dias" :key="dia.dia_id" class="px-2 py-3 text-xs font-semibold text-center border-r border-blue-800" style="min-width: 140px;">
+                <th class="px-3 py-3 text-xs font-semibold text-left border-r border-blue-800" style="width: 70px;">HORA</th>
+                <th v-for="dia in dias" :key="dia.dia_id" class="px-2 py-3 text-xs font-semibold text-center border-r border-blue-800" style="width: 150px;">
                   {{ dia.dia_nombre.toUpperCase() }}
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="hora in horas" :key="hora" class="border-b border-gray-100">
-                <td class="px-3 py-2 text-xs font-medium text-gray-600 border-r border-gray-200 bg-gray-50 whitespace-nowrap">
+              <tr v-for="hora in horas" :key="hora" style="height: 48px;">
+                <td class="px-3 text-xs font-medium text-gray-600 border-r border-b border-gray-200 bg-gray-50 whitespace-nowrap align-top pt-1" style="width: 70px;">
                   {{ formatHora(hora) }}
                 </td>
                 <td
                   v-for="dia in dias"
                   :key="dia.dia_id"
                   @click="handleCeldaClick(dia, hora)"
-                  class="px-1 py-1 border-r border-gray-100 cursor-pointer hover:bg-blue-50 transition relative"
-                  style="min-height: 40px;"
+                  class="border-r border-b border-gray-100 cursor-pointer hover:bg-blue-50 transition"
+                  style="width: 150px; height: 48px; position: relative; padding: 0;"
                 >
-                  <div v-for="item in getCeldaItems(dia.dia_orden, hora)" :key="item.hor_id"
-                    class="rounded px-2 py-1 mb-1 text-left relative group"
-                    :style="{ backgroundColor: getColorMateria(item.mat_nombre) + '20', borderLeft: '3px solid ' + getColorMateria(item.mat_nombre) }"
-                  >
-                    <p class="text-xs font-medium truncate" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
-                    <p class="text-xs text-gray-500 truncate">{{ item.docente_nombre || 'Sin docente' }}</p>
-                    <p class="text-xs text-gray-400 truncate">{{ item.par_nombre }} {{ item.aul_nombre ? '| ' + item.aul_nombre : '' }}</p>
-                    <button @click.stop="deleteHorarioGrilla(item.hor_id)" class="absolute top-1 right-1 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition">
-                      <i class="pi pi-times text-xs"></i>
-                    </button>
-                  </div>
+                  <template v-for="item in getCeldaItems(dia.dia_orden, hora)" :key="item.hor_id">
+                    <div
+                      class="rounded text-left group"
+                      :style="{
+                        backgroundColor: getColorMateria(item.mat_nombre) + '30',
+                        borderLeft: '4px solid ' + getColorMateria(item.mat_nombre),
+                        position: 'absolute',
+                        top: '1px',
+                        left: '1px',
+                        right: '1px',
+                        height: (getRowspan(item.blq_hora_inicio, item.blq_hora_fin) * 48 - 2) + 'px',
+                        overflow: 'hidden',
+                        zIndex: 10,
+                        padding: '4px 6px',
+                      }"
+                    >
+                      <p class="text-xs font-semibold leading-tight" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
+                      <p class="text-xs text-gray-600 leading-tight truncate">{{ item.docente_nombre?.trim() || 'Sin docente' }}</p>
+                      <p class="text-xs text-gray-400 leading-tight truncate">{{ item.aul_nombre || '' }}</p>
+                      <button @click.stop="deleteHorarioGrilla(item.hor_id)" class="absolute top-1 right-1 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition text-xs">
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </div>
+                  </template>
                 </td>
               </tr>
             </tbody>
@@ -117,29 +137,42 @@
       </div>
       <div v-else-if="horarioDocente.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse" style="table-layout: fixed;">
             <thead>
               <tr class="bg-blue-900 text-white">
-                <th class="px-3 py-3 text-xs font-semibold text-left border-r border-blue-800 w-20">HORA</th>
-                <th v-for="dia in dias" :key="dia.dia_id" class="px-2 py-3 text-xs font-semibold text-center border-r border-blue-800" style="min-width: 140px;">
+                <th class="px-3 py-3 text-xs font-semibold text-left border-r border-blue-800" style="width: 70px;">HORA</th>
+                <th v-for="dia in dias" :key="dia.dia_id" class="px-2 py-3 text-xs font-semibold text-center border-r border-blue-800" style="width: 150px;">
                   {{ dia.dia_nombre.toUpperCase() }}
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="hora in horas" :key="hora" class="border-b border-gray-100">
-                <td class="px-3 py-2 text-xs font-medium text-gray-600 border-r border-gray-200 bg-gray-50 whitespace-nowrap">
+              <tr v-for="hora in horas" :key="hora" style="height: 48px;">
+                <td class="px-3 text-xs font-medium text-gray-600 border-r border-b border-gray-200 bg-gray-50 whitespace-nowrap align-top pt-1">
                   {{ formatHora(hora) }}
                 </td>
-                <td v-for="dia in dias" :key="dia.dia_id" class="px-1 py-1 border-r border-gray-100">
-                  <div v-for="item in getCeldaDocente(dia.dia_orden, hora)" :key="item.hor_id"
-                    class="rounded px-2 py-1 mb-1 text-left"
-                    :style="{ backgroundColor: getColorMateria(item.mat_nombre) + '20', borderLeft: '3px solid ' + getColorMateria(item.mat_nombre) }"
-                  >
-                    <p class="text-xs font-medium truncate" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
-                    <p class="text-xs text-gray-500 truncate">{{ item.car_nombre }}</p>
-                    <p class="text-xs text-gray-400 truncate">{{ item.par_nombre }} {{ item.aul_nombre ? '| ' + item.aul_nombre : '' }}</p>
-                  </div>
+                <td v-for="dia in dias" :key="dia.dia_id" class="border-r border-b border-gray-100" style="position: relative; padding: 0; height: 48px;">
+                  <template v-for="item in getCeldaDocente(dia.dia_orden, hora)" :key="item.hor_id">
+                    <div
+                      class="rounded text-left"
+                      :style="{
+                        backgroundColor: getColorMateria(item.mat_nombre) + '30',
+                        borderLeft: '4px solid ' + getColorMateria(item.mat_nombre),
+                        position: 'absolute',
+                        top: '1px',
+                        left: '1px',
+                        right: '1px',
+                        height: (getRowspan(item.blq_hora_inicio, item.blq_hora_fin) * 48 - 2) + 'px',
+                        overflow: 'hidden',
+                        zIndex: 10,
+                        padding: '4px 6px',
+                      }"
+                    >
+                      <p class="text-xs font-semibold leading-tight" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
+                      <p class="text-xs text-gray-600 leading-tight truncate">{{ item.car_nombre }}</p>
+                      <p class="text-xs text-gray-400 leading-tight truncate">{{ item.par_nombre }} {{ item.aul_nombre ? '| ' + item.aul_nombre : '' }}</p>
+                    </div>
+                  </template>
                 </td>
               </tr>
             </tbody>
@@ -242,14 +275,16 @@ const horarioDocente = ref<HorarioDocente[]>([])
 const miEscuela = ref<Escuela | null>(null)
 
 const activeTab = ref('grilla')
-const filters = reactive({ per_id: 0, car_id: 0, nivel: 0 })
+const filters = reactive({ per_id: 0, car_id: 0, nivel: 0, paralelo: '' })
+const todaProgramacion = ref<Programacion[]>([])
+const nivelesDisponibles = ref<number[]>([])
+const paralelosDisponibles = ref<string[]>([])
 const selectedDocId = ref(0)
 
 const loadingData = ref(false)
 const loadingDocente = ref(false)
 const saving = ref(false)
 
-// Modal
 const showAsignarModal = ref(false)
 const selectedDia = ref<Dia | null>(null)
 const selectedHora = ref(0)
@@ -261,7 +296,6 @@ const modalForm = reactive({
   aul_id: 0,
 })
 
-// Horas de 0 a 23
 const horas = Array.from({ length: 24 }, (_, i) => i)
 
 const colores = [
@@ -285,14 +319,22 @@ function formatHora(h: number): string {
 function getCeldaItems(diaOrden: number, hora: number) {
   const horaStr = formatHora(hora)
   return horarioCompleto.value.filter(h => {
-    return h.dia_orden === diaOrden && h.blq_hora_inicio === horaStr
+    const horaInicio = h.blq_hora_inicio?.substring(0, 5)
+    return Number(h.dia_orden) === diaOrden && horaInicio === horaStr
   })
+}
+
+function getRowspan(horaInicio: string, horaFin: string): number {
+  const inicio = parseInt(horaInicio.substring(0, 2))
+  const fin = parseInt(horaFin.substring(0, 2))
+  return Math.max(1, fin - inicio)
 }
 
 function getCeldaDocente(diaOrden: number, hora: number) {
   const horaStr = formatHora(hora)
   return horarioDocente.value.filter(h => {
-    return h.dia_orden === diaOrden && h.blq_hora_inicio === horaStr
+    const horaInicio = h.blq_hora_inicio?.substring(0, 5)
+    return Number(h.dia_orden) === diaOrden && horaInicio === horaStr
   })
 }
 
@@ -334,26 +376,58 @@ onMounted(async () => {
 })
 
 async function onCarreraChange() {
+  filters.nivel = 0
+  filters.paralelo = ''
+  programacion.value = []
+  todaProgramacion.value = []
+  horarioCompleto.value = []
+  nivelesDisponibles.value = []
+  paralelosDisponibles.value = []
+
+  if (!filters.per_id || !filters.car_id) return
+
+  try {
+    const progRes = await programacionApi.getByPeriodoCarrera(Number(filters.per_id), Number(filters.car_id))
+    todaProgramacion.value = progRes.data
+    const niveles = [...new Set(progRes.data.map(p => p.pra_nivel))].sort((a, b) => a - b)
+    nivelesDisponibles.value = niveles
+  } catch (error) {
+    console.error('Error cargando programacion:', error)
+  }
+}
+
+function onNivelChange() {
+  filters.paralelo = ''
   programacion.value = []
   horarioCompleto.value = []
+
+  if (!filters.nivel) {
+    paralelosDisponibles.value = []
+    return
+  }
+
+  const paralelos = [...new Set(
+    todaProgramacion.value
+      .filter(p => p.pra_nivel === filters.nivel)
+      .map(p => p.par_nombre ?? '')
+      .filter(p => p !== '')
+  )].sort()
+  paralelosDisponibles.value = paralelos
 }
 
 async function loadData() {
-  if (!filters.per_id || !filters.car_id) return
+  if (!filters.per_id || !filters.car_id || !filters.nivel || !filters.paralelo) return
 
   loadingData.value = true
   try {
-    // Cargar programacion para el select de materias
-    const progRes = await programacionApi.getByPeriodoCarrera(Number(filters.per_id), Number(filters.car_id))
-    programacion.value = filters.nivel
-      ? progRes.data.filter(p => p.pra_nivel === filters.nivel)
-      : progRes.data
+    programacion.value = todaProgramacion.value.filter(
+      p => p.pra_nivel === filters.nivel && p.par_nombre === filters.paralelo
+    )
 
-    // Cargar horario completo para la grilla
     const horRes = await horariosApi.getHorarioCompleto(Number(filters.per_id), Number(filters.car_id))
-    horarioCompleto.value = filters.nivel
-      ? horRes.data.filter(h => h.pra_nivel === filters.nivel)
-      : horRes.data
+    horarioCompleto.value = horRes.data.filter(
+      h => h.pra_nivel === filters.nivel && h.par_nombre === filters.paralelo
+    )
   } catch (error) {
     console.error('Error cargando datos:', error)
   } finally {
@@ -382,16 +456,18 @@ async function handleAsignar() {
   asignarModalError.value = ''
 
   try {
-    // Buscar o crear el bloque horario
-    let blqId = await findOrCreateBloque(modalForm.hora_inicio, modalForm.hora_fin)
+    const { blq_id_inicio, blq_id_fin } = await findOrCreateBloque(
+      modalForm.hora_inicio,
+      modalForm.hora_fin
+    )
 
     await horariosApi.create({
       pra_id: Number(modalForm.pra_id),
       dia_id: Number(selectedDia.value.dia_id),
-      blq_id: Number(blqId),
+      blq_id_inicio: Number(blq_id_inicio),
+      blq_id_fin: Number(blq_id_fin),
       aul_id: modalForm.aul_id ? Number(modalForm.aul_id) : undefined,
     })
-
     showAsignarModal.value = false
     await loadData()
   } catch (err: any) {
@@ -401,25 +477,47 @@ async function handleAsignar() {
   }
 }
 
-async function findOrCreateBloque(horaInicio: string, horaFin: string): Promise<number> {
-  // Buscar si ya existe
+async function findOrCreateBloque(
+  horaInicio: string,
+  horaFin: string
+): Promise<{ blq_id_inicio: number; blq_id_fin: number }> {
   const bloquesRes = await horariosApi.getBloques()
-  const existente = bloquesRes.data.find(b => b.blq_hora_inicio === horaInicio && b.blq_hora_fin === horaFin)
 
-  if (existente) {
-    return existente.blq_id
+  // Buscar bloque cuya hora_inicio coincida
+  let bloqueInicio = bloquesRes.data.find(
+    b => b.blq_hora_inicio.substring(0, 5) === horaInicio
+  )
+  if (!bloqueInicio) {
+    const orden = bloquesRes.data.length + 1
+    const res = await api.post('/programacion-academica/bloques-horarios', {
+      blq_hora_inicio: horaInicio,
+      blq_hora_fin: horaFin,
+      blq_descripcion: `${horaInicio} - ${horaFin}`,
+      blq_orden: orden,
+    })
+    bloqueInicio = res.data.bloque
   }
 
-  // Crear nuevo bloque
-  const orden = bloquesRes.data.length + 1
-  const response = await api.post('/programacion-academica/bloques-horarios', {
-    blq_hora_inicio: horaInicio,
-    blq_hora_fin: horaFin,
-    blq_descripcion: `${horaInicio} - ${horaFin}`,
-    blq_orden: orden,
-  })
+  // Buscar bloque cuya hora_fin coincida
+  let bloqueFin = bloquesRes.data.find(
+    b => b.blq_hora_fin.substring(0, 5) === horaFin
+  )
+  if (!bloqueFin) {
+    const bloquesActualizados = await horariosApi.getBloques()
+    const orden = bloquesActualizados.data.length + 1
+    const res = await api.post('/programacion-academica/bloques-horarios', {
+      blq_hora_inicio: horaInicio,
+      blq_hora_fin: horaFin,
+      blq_descripcion: `${horaInicio} - ${horaFin}`,
+      blq_orden: orden,
+    })
+    bloqueFin = res.data.bloque
+  }
 
-  return response.data.bloque.blq_id
+  return {
+    blq_id_inicio: bloqueInicio!.blq_id,
+    blq_id_fin: bloqueFin!.blq_id,
+  }
 }
 
 async function deleteHorarioGrilla(horId: number) {
@@ -439,7 +537,10 @@ async function loadHorarioDocente() {
 
   loadingDocente.value = true
   try {
-    const response = await horariosApi.getHorarioDocente(Number(selectedDocId.value), Number(filters.per_id))
+    const response = await horariosApi.getHorarioDocente(
+      Number(selectedDocId.value),
+      Number(filters.per_id)
+    )
     horarioDocente.value = response.data
   } catch (error) {
     console.error('Error cargando horario docente:', error)

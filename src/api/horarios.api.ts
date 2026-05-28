@@ -71,7 +71,8 @@ export interface BloqueHorario {
 export interface CreateHorarioRequest {
   pra_id: number;
   dia_id: number;
-  blq_id: number;
+  blq_id_inicio: number;
+  blq_id_fin: number;
   aul_id?: number;
   hor_observaciones?: string;
 }
