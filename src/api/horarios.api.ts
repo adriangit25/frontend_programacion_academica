@@ -108,4 +108,13 @@ export const horariosApi = {
   getBloques() {
     return api.get<BloqueHorario[]>("/programacion-academica/bloques-horarios");
   },
+  generarIA(data: { per_id: number; car_id: number; esc_id: number }) {
+    return api.post("/programacion-academica/ia/generar-horarios", data);
+  },
+  confirmarIA(data: { per_id: number; car_id: number; horarios: any[] }) {
+    return api.post("/programacion-academica/ia/confirmar-horarios", data);
+  },
+  limpiarIA(data: { per_id: number; car_id: number }) {
+    return api.post("/programacion-academica/ia/limpiar-horarios", data);
+  },
 };

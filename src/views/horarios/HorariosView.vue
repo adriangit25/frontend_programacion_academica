@@ -7,13 +7,17 @@
 
     <!-- Tabs -->
     <div class="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-      <button @click="activeTab = 'grilla'" :class="['px-4 py-2 rounded-lg text-sm font-medium transition', activeTab === 'grilla' ? 'bg-white text-blue-900 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
-        Asignar Horarios
-      </button>
-      <button @click="activeTab = 'docente'" :class="['px-4 py-2 rounded-lg text-sm font-medium transition', activeTab === 'docente' ? 'bg-white text-blue-900 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
-        Horario Docente
-      </button>
-    </div>
+        <button @click="activeTab = 'grilla'" :class="['px-4 py-2 rounded-lg text-sm font-medium transition', activeTab === 'grilla' ? 'bg-white text-blue-900 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
+          Asignar Horarios
+        </button>
+        <button @click="activeTab = 'docente'" :class="['px-4 py-2 rounded-lg text-sm font-medium transition', activeTab === 'docente' ? 'bg-white text-blue-900 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
+          Horario Docente
+        </button>
+        <button @click="activeTab = 'ia'" :class="['px-4 py-2 rounded-lg text-sm font-medium transition', activeTab === 'ia' ? 'bg-white text-blue-900 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
+          <i class="pi pi-bolt mr-1"></i>
+          Generar con IA
+        </button>
+      </div>
 
     <!-- Filtros -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -181,6 +185,125 @@
       </div>
     </div>
 
+    <!-- TAB 3: Generar con IA -->
+    <div v-if="activeTab === 'ia'">
+      <!-- Estado inicial -->
+      <div v-if="!iaResultado" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 bg-blue-900 rounded-xl mx-auto mb-4 flex items-center justify-center">
+            <i class="pi pi-bolt text-white text-2xl"></i>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800 mb-2">Generar Horarios con Algoritmo Genetico</h2>
+          <p class="text-gray-500 text-sm max-w-lg mx-auto">El algoritmo generara una programacion optimizada considerando restricciones de docentes, aulas, horas semanales y preferencias de horario.</p>
+        </div>
+
+        <div v-if="!filters.per_id || !filters.car_id" class="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg text-sm text-center mb-6">
+          Seleccione periodo y carrera en los filtros superiores para continuar
+        </div>
+
+        <div v-if="iaError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+          {{ iaError }}
+        </div>
+
+        <div class="flex justify-center">
+          <button
+            @click="handleGenerarIA"
+            :disabled="!filters.per_id || !filters.car_id || generandoIA"
+            class="flex items-center gap-2 px-8 py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          >
+            <i :class="['pi', generandoIA ? 'pi-spin pi-spinner' : 'pi-bolt']"></i>
+            {{ generandoIA ? 'Generando... esto puede tardar unos segundos' : 'Generar Horarios' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Resultado de la IA -->
+      <div v-else>
+        <!-- Info del resultado -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-6">
+              <div class="text-center">
+                <p class="text-2xl font-bold text-blue-900">{{ iaResultado.fitness?.toFixed(1) }}</p>
+                <p class="text-xs text-gray-500">Fitness Score</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-green-700">{{ iaResultado.total_clases }}</p>
+                <p class="text-xs text-gray-500">Clases Generadas</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-gray-700">{{ iaResultado.generaciones }}</p>
+                <p class="text-xs text-gray-500">Generaciones</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button @click="handleLimpiarIA" :disabled="generandoIA" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition disabled:opacity-50">
+                <i class="pi pi-refresh mr-1"></i>
+                Regenerar
+              </button>
+              <button @click="handleConfirmarIA" :disabled="confirmandoIA" class="flex items-center gap-2 px-6 py-2 bg-green-700 text-white rounded-lg text-sm hover:bg-green-600 transition disabled:opacity-50">
+                <i :class="['pi', confirmandoIA ? 'pi-spin pi-spinner' : 'pi-check']"></i>
+                {{ confirmandoIA ? 'Guardando...' : 'Confirmar y Guardar' }}
+              </button>
+            </div>
+          </div>
+
+          <div v-if="iaConfirmado" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mt-4 text-sm">
+            {{ iaConfirmado }}
+          </div>
+        </div>
+
+        <!-- Grilla de previsualización -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="bg-blue-900 text-white px-6 py-3">
+            <h3 class="font-semibold">Previsualización de Horarios Generados</h3>
+            <p class="text-xs text-blue-300 mt-1">Esta es una sugerencia del algoritmo. Puede confirmar o regenerar.</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse" style="table-layout: fixed;">
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                  <th class="px-3 py-3 text-xs font-semibold text-gray-600 text-left border-r border-gray-200" style="width: 70px;">HORA</th>
+                  <th v-for="dia in dias" :key="dia.dia_id" class="px-2 py-3 text-xs font-semibold text-gray-600 text-center border-r border-gray-200" style="width: 150px;">
+                    {{ dia.dia_nombre.toUpperCase() }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="hora in horas" :key="hora" style="height: 48px;">
+                  <td class="px-3 text-xs font-medium text-gray-600 border-r border-b border-gray-200 bg-gray-50 whitespace-nowrap align-top pt-1" style="width: 70px;">
+                    {{ formatHora(hora) }}
+                  </td>
+                  <td v-for="dia in dias" :key="dia.dia_id" class="border-r border-b border-gray-100" style="width: 150px; height: 48px; position: relative; padding: 0;">
+                    <template v-for="item in getCeldaIA(dia.dia_orden, hora)" :key="item.pra_id + '-' + item.dia_id">
+                      <div
+                        class="rounded text-left"
+                        :style="{
+                          backgroundColor: getColorMateria(item.mat_nombre) + '30',
+                          borderLeft: '4px solid ' + getColorMateria(item.mat_nombre),
+                          position: 'absolute',
+                          top: '1px',
+                          left: '1px',
+                          right: '1px',
+                          height: (getRowspan(item.hora_inicio, item.hora_fin) * 48 - 2) + 'px',
+                          overflow: 'hidden',
+                          zIndex: 10,
+                          padding: '4px 6px',
+                        }"
+                      >
+                        <p class="text-xs font-semibold leading-tight" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
+                        <p class="text-xs text-gray-500 leading-tight truncate">{{ item.duracion }}h</p>
+                      </div>
+                    </template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal Asignar Materia -->
     <div v-if="showAsignarModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
@@ -280,6 +403,12 @@ const todaProgramacion = ref<Programacion[]>([])
 const nivelesDisponibles = ref<number[]>([])
 const paralelosDisponibles = ref<string[]>([])
 const selectedDocId = ref(0)
+// IA
+const iaResultado = ref<any>(null)
+const generandoIA = ref(false)
+const confirmandoIA = ref(false)
+const iaError = ref('')
+const iaConfirmado = ref('')
 
 const loadingData = ref(false)
 const loadingDocente = ref(false)
@@ -547,5 +676,68 @@ async function loadHorarioDocente() {
   } finally {
     loadingDocente.value = false
   }
+}
+
+function getCeldaIA(diaOrden: number, hora: number) {
+  if (!iaResultado.value?.horarios) return []
+  const horaStr = formatHora(hora)
+  return iaResultado.value.horarios.filter((h: any) => {
+    const diaItem = dias.value.find(d => Number(d.dia_id) === Number(h.dia_id))
+    if (!diaItem) return false
+    const horaInicio = h.hora_inicio?.substring(0, 5)
+    return Number(diaItem.dia_orden) === diaOrden && horaInicio === horaStr
+  })
+}
+
+async function handleGenerarIA() {
+  if (!filters.per_id || !filters.car_id) return
+
+  generandoIA.value = true
+  iaError.value = ''
+  iaResultado.value = null
+  iaConfirmado.value = ''
+
+  try {
+    const escId = miEscuela.value ? Number(miEscuela.value.esc_id) : 0
+    const response = await horariosApi.generarIA({
+      per_id: Number(filters.per_id),
+      car_id: Number(filters.car_id),
+      esc_id: escId,
+    })
+    iaResultado.value = response.data.resultado
+  } catch (err: any) {
+    iaError.value = err.response?.data?.message || 'Error al generar horarios'
+  } finally {
+    generandoIA.value = false
+  }
+  console.log('iaResultado:', JSON.stringify(iaResultado.value, null, 2))
+}
+
+async function handleConfirmarIA() {
+  if (!iaResultado.value?.horarios) return
+
+  confirmandoIA.value = true
+  iaConfirmado.value = ''
+
+  try {
+    const response = await horariosApi.confirmarIA({
+      per_id: Number(filters.per_id),
+      car_id: Number(filters.car_id),
+      horarios: iaResultado.value.horarios,
+    })
+    iaConfirmado.value = response.data.message
+    // Recargar grilla manual también
+    await loadData()
+  } catch (err: any) {
+    iaError.value = err.response?.data?.message || 'Error al confirmar horarios'
+  } finally {
+    confirmandoIA.value = false
+  }
+}
+
+async function handleLimpiarIA() {
+  iaResultado.value = null
+  iaConfirmado.value = ''
+  iaError.value = ''
 }
 </script>
