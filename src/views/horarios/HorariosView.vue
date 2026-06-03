@@ -84,29 +84,18 @@
                 <td class="px-3 text-xs font-medium text-gray-600 border-r border-b border-gray-200 bg-gray-50 whitespace-nowrap align-top pt-1" style="width: 70px;">
                   {{ formatHora(hora) }}
                 </td>
-                <td
-                  v-for="dia in dias"
-                  :key="dia.dia_id"
-                  @click="handleCeldaClick(dia, hora)"
+                <td v-for="dia in dias" :key="dia.dia_id" @click="handleCeldaClick(dia, hora)"
                   class="border-r border-b border-gray-100 cursor-pointer hover:bg-blue-50 transition"
-                  style="width: 150px; height: 48px; position: relative; padding: 0;"
-                >
+                  style="width: 150px; height: 48px; position: relative; padding: 0;">
                   <template v-for="item in getCeldaItems(dia.dia_orden, hora)" :key="item.hor_id">
-                    <div
-                      class="rounded text-left group"
+                    <div class="rounded text-left group"
                       :style="{
                         backgroundColor: getColorMateria(item.mat_nombre) + '30',
                         borderLeft: '4px solid ' + getColorMateria(item.mat_nombre),
-                        position: 'absolute',
-                        top: '1px',
-                        left: '1px',
-                        right: '1px',
+                        position: 'absolute', top: '1px', left: '1px', right: '1px',
                         height: (getRowspan(item.blq_hora_inicio, item.blq_hora_fin) * 48 - 2) + 'px',
-                        overflow: 'hidden',
-                        zIndex: 10,
-                        padding: '4px 6px',
-                      }"
-                    >
+                        overflow: 'hidden', zIndex: 10, padding: '4px 6px',
+                      }">
                       <p class="text-xs font-semibold leading-tight" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
                       <p class="text-xs text-gray-600 leading-tight truncate">{{ item.docente_nombre?.trim() || 'Sin docente' }}</p>
                       <p class="text-xs text-gray-400 leading-tight truncate">{{ item.aul_nombre || '' }}</p>
@@ -134,7 +123,6 @@
           </option>
         </select>
       </div>
-
       <div v-if="loadingDocente" class="text-center py-8 text-gray-400">Cargando...</div>
       <div v-else-if="selectedDocId && horarioDocente.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">
         El docente no tiene horarios en este periodo
@@ -152,26 +140,17 @@
             </thead>
             <tbody>
               <tr v-for="hora in horas" :key="hora" style="height: 48px;">
-                <td class="px-3 text-xs font-medium text-gray-600 border-r border-b border-gray-200 bg-gray-50 whitespace-nowrap align-top pt-1">
-                  {{ formatHora(hora) }}
-                </td>
+                <td class="px-3 text-xs font-medium text-gray-600 border-r border-b border-gray-200 bg-gray-50 whitespace-nowrap align-top pt-1">{{ formatHora(hora) }}</td>
                 <td v-for="dia in dias" :key="dia.dia_id" class="border-r border-b border-gray-100" style="position: relative; padding: 0; height: 48px;">
                   <template v-for="item in getCeldaDocente(dia.dia_orden, hora)" :key="item.hor_id">
-                    <div
-                      class="rounded text-left"
+                    <div class="rounded text-left"
                       :style="{
                         backgroundColor: getColorMateria(item.mat_nombre) + '30',
                         borderLeft: '4px solid ' + getColorMateria(item.mat_nombre),
-                        position: 'absolute',
-                        top: '1px',
-                        left: '1px',
-                        right: '1px',
+                        position: 'absolute', top: '1px', left: '1px', right: '1px',
                         height: (getRowspan(item.blq_hora_inicio, item.blq_hora_fin) * 48 - 2) + 'px',
-                        overflow: 'hidden',
-                        zIndex: 10,
-                        padding: '4px 6px',
-                      }"
-                    >
+                        overflow: 'hidden', zIndex: 10, padding: '4px 6px',
+                      }">
                       <p class="text-xs font-semibold leading-tight" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
                       <p class="text-xs text-gray-600 leading-tight truncate">{{ item.car_nombre }}</p>
                       <p class="text-xs text-gray-400 leading-tight truncate">{{ item.par_nombre }} {{ item.aul_nombre ? '| ' + item.aul_nombre : '' }}</p>
@@ -187,192 +166,186 @@
 
     <!-- TAB 3: Generar con IA -->
     <div v-if="activeTab === 'ia'">
-      <!-- Configuracion -->
-      <div v-if="!iaResultado" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
-            <i class="pi pi-bolt text-white"></i>
-          </div>
-          <div>
-            <h2 class="text-lg font-semibold text-gray-800">Generar Horarios con Algoritmo Genetico</h2>
-            <p class="text-sm text-gray-500">Configure los parametros y el algoritmo generara una programacion optimizada</p>
-          </div>
-        </div>
+      <div v-if="!filters.per_id || !filters.car_id" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+        <i class="pi pi-bolt text-4xl text-gray-300 mb-3"></i>
+        <p class="text-gray-400">Seleccione periodo y carrera en los filtros superiores para continuar</p>
+      </div>
 
-        <div v-if="!filters.per_id || !filters.car_id" class="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg text-sm mb-6">
-          Seleccione periodo y carrera en los filtros superiores para continuar
-        </div>
+      <div v-else-if="combinacionesIA.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+        <p class="text-gray-400">No hay programacion academica para esta carrera y periodo</p>
+      </div>
 
-        <div v-if="iaError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-          {{ iaError }}
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Nivel y Paralelo -->
-          <div class="space-y-4">
-            <h3 class="text-sm font-semibold text-gray-700 uppercase">Nivel y Paralelo</h3>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
-              <select v-model.number="iaConfig.nivel" @change="onNivelIAChange" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
-                <option value="0">-- Seleccione --</option>
-                <option v-for="n in nivelesIA" :key="n" :value="n">Nivel {{ n }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Paralelo</label>
-              <select v-model.number="iaConfig.par_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
-                <option value="0">-- Seleccione --</option>
-                <option v-for="par in paralelosIA" :key="par.par_id" :value="par.par_id">{{ par.par_nombre }}</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Rango de horas y duracion -->
-          <div class="space-y-4">
-            <h3 class="text-sm font-semibold text-gray-700 uppercase">Rango de Horas</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Hora Inicio</label>
-                <select v-model.number="iaConfig.hora_inicio" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
-                  <option v-for="h in horas" :key="h" :value="h">{{ formatHora(h) }}</option>
-                </select>
+      <div v-else>
+        <!-- Header IA -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+                <i class="pi pi-bolt text-white"></i>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Hora Fin</label>
-                <select v-model.number="iaConfig.hora_fin" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
-                  <option v-for="h in horas" :key="h" :value="h">{{ formatHora(h) }}</option>
-                </select>
+                <h2 class="text-lg font-semibold text-gray-800">Generar Horarios con Algoritmo Genetico</h2>
+                <p class="text-sm text-gray-500">Configure cada nivel y paralelo de forma independiente</p>
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Duracion Min (horas)</label>
-                <input v-model.number="iaConfig.duracion_min" type="number" min="1" max="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Duracion Max (horas)</label>
-                <input v-model.number="iaConfig.duracion_max" type="number" min="1" max="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
-              </div>
+            <div class="flex items-center gap-3">
+              <button @click="handleLimpiarIA" v-if="iaResultados.length > 0" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition">
+                <i class="pi pi-times mr-1"></i>Limpiar
+              </button>
+              <button @click="handleRegenerarIA" v-if="iaResultados.length > 0" :disabled="generandoIA" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition disabled:opacity-50">
+                <i :class="['pi mr-1', generandoIA ? 'pi-spin pi-spinner' : 'pi-refresh']"></i>Regenerar Todo
+              </button>
+              <button @click="handleConfirmarIA" v-if="iaResultados.length > 0" :disabled="confirmandoIA" class="flex items-center gap-2 px-6 py-2 bg-green-700 text-white rounded-lg text-sm hover:bg-green-600 transition disabled:opacity-50">
+                <i :class="['pi', confirmandoIA ? 'pi-spin pi-spinner' : 'pi-check']"></i>
+                {{ confirmandoIA ? 'Guardando...' : 'Confirmar y Guardar Todo' }}
+              </button>
+              <button @click="handleGenerarIA" v-if="iaResultados.length === 0" :disabled="generandoIA" class="flex items-center gap-2 px-8 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium">
+                <i :class="['pi', generandoIA ? 'pi-spin pi-spinner' : 'pi-bolt']"></i>
+                {{ generandoIA ? 'Generando...' : 'Generar Todo' }}
+              </button>
             </div>
           </div>
 
-          <!-- Dias permitidos -->
-          <div class="md:col-span-2 space-y-3">
-            <h3 class="text-sm font-semibold text-gray-700 uppercase">Dias Permitidos</h3>
-            <div class="flex flex-wrap gap-4">
-              <label v-for="dia in dias" :key="dia.dia_id" class="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  :value="Number(dia.dia_id)"
-                  v-model="iaConfig.dias_permitidos"
-                  class="w-4 h-4 text-blue-900 rounded border-gray-300 focus:ring-blue-500"
-                />
-                <span class="text-sm text-gray-700">{{ dia.dia_nombre }}</span>
+          <div v-if="iaError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-4 text-sm">{{ iaError }}</div>
+          <div v-if="iaConfirmado" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mt-4 text-sm">{{ iaConfirmado }}</div>
+
+          <!-- Laboratorios globales -->
+          <div class="mt-6 pt-4 border-t border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-700 uppercase mb-2">Laboratorios Disponibles <span class="text-gray-400 normal-case font-normal">(opcional - aplica para todos)</span></h3>
+            <div v-if="aulas.length === 0" class="text-sm text-gray-400">No hay aulas registradas</div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <label v-for="aula in aulas" :key="aula.aul_id" class="flex items-center gap-2 cursor-pointer bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 hover:bg-blue-50 hover:border-blue-200 transition">
+                <input type="checkbox" :value="Number(aula.aul_id)" v-model="labsGlobales" class="w-4 h-4 text-blue-900 rounded border-gray-300 focus:ring-blue-500" />
+                <div>
+                  <p class="text-sm text-gray-700 font-medium">{{ aula.aul_codigo }} - {{ aula.aul_nombre }}</p>
+                  <p class="text-xs text-gray-400">Capacidad: {{ aula.aul_capacidad }}</p>
+                </div>
               </label>
             </div>
           </div>
         </div>
 
-        <div class="flex justify-end mt-6">
-          <button
-            @click="handleGenerarIA"
-            :disabled="!filters.per_id || !filters.car_id || generandoIA"
-            class="flex items-center gap-2 px-8 py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-          >
+        <!-- Tarjetas de configuracion por nivel+paralelo -->
+        <div class="space-y-4 mb-6">
+          <div v-for="combo in combinacionesIA" :key="`${combo.nivel}-${combo.par_id}`" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gray-50 border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-xs font-medium">Nivel {{ combo.nivel }}</span>
+                <span class="text-sm font-medium text-gray-800">Paralelo {{ combo.par_nombre }}</span>
+              </div>
+              <div v-if="getResultadoGrupo(combo.nivel, combo.par_id)" class="flex items-center gap-2">
+                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                  <i class="pi pi-check mr-1"></i>Generado - Fitness: {{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.fitness?.toFixed(1) }}
+                </span>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Rango de horas -->
+                <div class="space-y-3">
+                  <h4 class="text-xs font-semibold text-gray-500 uppercase">Rango de Horas</h4>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-xs text-gray-600 mb-1">Hora Inicio</label>
+                      <select v-model.number="gruposConfig[`${combo.nivel}-${combo.par_id}`].hora_inicio" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg outline-none text-sm">
+                        <option v-for="h in horas" :key="h" :value="h">{{ formatHora(h) }}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-600 mb-1">Hora Fin</label>
+                      <select v-model.number="gruposConfig[`${combo.nivel}-${combo.par_id}`].hora_fin" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg outline-none text-sm">
+                        <option v-for="h in horas" :key="h" :value="h">{{ formatHora(h) }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-xs text-gray-600 mb-1">Dur. Min</label>
+                      <input v-model.number="gruposConfig[`${combo.nivel}-${combo.par_id}`].duracion_min" type="number" min="1" max="4" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg outline-none text-sm" />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-600 mb-1">Dur. Max</label>
+                      <input v-model.number="gruposConfig[`${combo.nivel}-${combo.par_id}`].duracion_max" type="number" min="1" max="4" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg outline-none text-sm" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dias -->
+                <div class="space-y-3">
+                  <h4 class="text-xs font-semibold text-gray-500 uppercase">Dias Permitidos</h4>
+                  <div class="flex flex-wrap gap-2">
+                    <label v-for="dia in dias" :key="dia.dia_id" class="flex items-center gap-1 cursor-pointer">
+                      <input type="checkbox" :value="Number(dia.dia_id)" v-model="gruposConfig[`${combo.nivel}-${combo.par_id}`].dias_permitidos" class="w-3.5 h-3.5 text-blue-900 rounded border-gray-300" />
+                      <span class="text-xs text-gray-700">{{ dia.dia_abreviatura || dia.dia_nombre.substring(0, 3) }}</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Grilla resultado si existe -->
+                <div v-if="!getResultadoGrupo(combo.nivel, combo.par_id)" class="flex items-center justify-center">
+                  <button @click="handleGenerarGrupo(combo)" :disabled="generandoIA" class="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50">
+                    <i :class="['pi', generandoIA ? 'pi-spin pi-spinner' : 'pi-bolt']"></i>
+                    Generar este grupo
+                  </button>
+                </div>
+                <div v-else class="flex items-center justify-center">
+                  <button @click="handleRegenerarGrupo(combo)" :disabled="generandoIA" class="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition disabled:opacity-50">
+                    <i :class="['pi', generandoIA ? 'pi-spin pi-spinner' : 'pi-refresh']"></i>
+                    Regenerar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grilla de previsualización si hay resultado -->
+            <div v-if="getResultadoGrupo(combo.nivel, combo.par_id)" class="border-t border-gray-200">
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse" style="table-layout: fixed;">
+                  <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                      <th class="px-3 py-2 text-xs font-semibold text-gray-600 text-left border-r border-gray-200" style="width: 70px;">HORA</th>
+                      <th v-for="dia in dias" :key="dia.dia_id" class="px-2 py-2 text-xs font-semibold text-gray-600 text-center border-r border-gray-200" style="width: 150px;">
+                        {{ dia.dia_nombre.toUpperCase() }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="hora in horasVisibles(combo.nivel, combo.par_id)" :key="hora" style="height: 48px;">
+                      <td class="px-3 text-xs font-medium text-gray-600 border-r border-b border-gray-200 bg-gray-50 whitespace-nowrap align-top pt-1" style="width: 70px;">
+                        {{ formatHora(hora) }}
+                      </td>
+                      <td v-for="dia in dias" :key="dia.dia_id" class="border-r border-b border-gray-100" style="width: 150px; height: 48px; position: relative; padding: 0;">
+                        <template v-for="item in getCeldaIAGrupo(getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.horarios, dia.dia_orden, hora)" :key="item.pra_id + '-' + item.dia_id + '-' + hora">
+                          <div class="rounded text-left"
+                            :style="{
+                              backgroundColor: getColorMateria(item.mat_nombre) + '30',
+                              borderLeft: '4px solid ' + getColorMateria(item.mat_nombre),
+                              position: 'absolute', top: '1px', left: '1px', right: '1px',
+                              height: (getRowspan(item.hora_inicio, item.hora_fin) * 48 - 2) + 'px',
+                              overflow: 'hidden', zIndex: 10, padding: '4px 6px',
+                            }">
+                            <p class="text-xs font-semibold leading-tight" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
+                            <p class="text-xs text-gray-500 leading-tight">{{ item.duracion }}h</p>
+                            <p v-if="item.aul_sugerida" class="text-xs text-gray-400 leading-tight truncate">
+                              <i class="pi pi-building text-xs mr-1"></i>{{ item.aul_sugerida.aul_nombre }}
+                            </p>
+                          </div>
+                        </template>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boton generar todo si no hay resultados -->
+        <div v-if="iaResultados.length === 0" class="flex justify-end">
+          <button @click="handleGenerarIA" :disabled="generandoIA" class="flex items-center gap-2 px-8 py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium">
             <i :class="['pi', generandoIA ? 'pi-spin pi-spinner' : 'pi-bolt']"></i>
-            {{ generandoIA ? 'Generando... puede tardar unos segundos' : 'Generar Horarios' }}
+            {{ generandoIA ? 'Generando...' : 'Generar Todos los Horarios' }}
           </button>
-        </div>
-      </div>
-
-      <!-- Resultado -->
-      <div v-else>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-6">
-              <div class="text-center">
-                <p class="text-2xl font-bold text-blue-900">{{ iaResultado.fitness?.toFixed(1) }}</p>
-                <p class="text-xs text-gray-500">Fitness Score</p>
-              </div>
-              <div class="text-center">
-                <p class="text-2xl font-bold text-green-700">{{ iaResultado.total_clases }}</p>
-                <p class="text-xs text-gray-500">Clases Generadas</p>
-              </div>
-              <div class="text-center">
-                <p class="text-2xl font-bold text-gray-700">{{ iaResultado.generaciones }}</p>
-                <p class="text-xs text-gray-500">Generaciones</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <button @click="handleLimpiarIA" :disabled="generandoIA" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition disabled:opacity-50">
-                <i class="pi pi-arrow-left mr-1"></i>
-                Volver a Configurar
-              </button>
-              <button @click="handleRegenerarIA" :disabled="generandoIA" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition disabled:opacity-50">
-                <i :class="['pi mr-1', generandoIA ? 'pi-spin pi-spinner' : 'pi-refresh']"></i>
-                Regenerar
-              </button>
-              <button @click="handleConfirmarIA" :disabled="confirmandoIA" class="flex items-center gap-2 px-6 py-2 bg-green-700 text-white rounded-lg text-sm hover:bg-green-600 transition disabled:opacity-50">
-                <i :class="['pi', confirmandoIA ? 'pi-spin pi-spinner' : 'pi-check']"></i>
-                {{ confirmandoIA ? 'Guardando...' : 'Confirmar y Guardar' }}
-              </button>
-            </div>
-          </div>
-          <div v-if="iaConfirmado" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mt-4 text-sm">
-            {{ iaConfirmado }}
-          </div>
-          <div v-if="iaError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-4 text-sm">
-            {{ iaError }}
-          </div>
-        </div>
-
-        <!-- Grilla previsualización -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div class="bg-blue-900 text-white px-6 py-3">
-            <h3 class="font-semibold">Previsualizacion de Horarios Generados</h3>
-            <p class="text-xs text-blue-300 mt-1">Esta es una sugerencia del algoritmo. Puede confirmar o regenerar.</p>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full border-collapse" style="table-layout: fixed;">
-              <thead>
-                <tr class="bg-gray-50 border-b border-gray-200">
-                  <th class="px-3 py-3 text-xs font-semibold text-gray-600 text-left border-r border-gray-200" style="width: 70px;">HORA</th>
-                  <th v-for="dia in dias" :key="dia.dia_id" class="px-2 py-3 text-xs font-semibold text-gray-600 text-center border-r border-gray-200" style="width: 150px;">
-                    {{ dia.dia_nombre.toUpperCase() }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="hora in horas" :key="hora" style="height: 48px;">
-                  <td class="px-3 text-xs font-medium text-gray-600 border-r border-b border-gray-200 bg-gray-50 whitespace-nowrap align-top pt-1" style="width: 70px;">
-                    {{ formatHora(hora) }}
-                  </td>
-                  <td v-for="dia in dias" :key="dia.dia_id" class="border-r border-b border-gray-100" style="width: 150px; height: 48px; position: relative; padding: 0;">
-                    <template v-for="item in getCeldaIA(dia.dia_orden, hora)" :key="item.pra_id + '-' + item.dia_id + '-' + hora">
-                      <div
-                        class="rounded text-left"
-                        :style="{
-                          backgroundColor: getColorMateria(item.mat_nombre) + '30',
-                          borderLeft: '4px solid ' + getColorMateria(item.mat_nombre),
-                          position: 'absolute',
-                          top: '1px',
-                          left: '1px',
-                          right: '1px',
-                          height: (getRowspan(item.hora_inicio, item.hora_fin) * 48 - 2) + 'px',
-                          overflow: 'hidden',
-                          zIndex: 10,
-                          padding: '4px 6px',
-                        }"
-                      >
-                        <p class="text-xs font-semibold leading-tight" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
-                        <p class="text-xs text-gray-500 leading-tight">{{ item.duracion }}h</p>
-                      </div>
-                    </template>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
     </div>
@@ -389,11 +362,7 @@
             <i class="pi pi-times"></i>
           </button>
         </div>
-
-        <div v-if="asignarModalError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-          {{ asignarModalError }}
-        </div>
-
+        <div v-if="asignarModalError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{{ asignarModalError }}</div>
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Materia</label>
@@ -428,7 +397,6 @@
             </select>
           </div>
         </div>
-
         <div class="flex justify-end gap-3 mt-6">
           <button @click="showAsignarModal = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
           <button @click="handleAsignar" :disabled="saving" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50">
@@ -441,7 +409,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { horariosApi } from '../../api/horarios.api'
 import { programacionApi } from '../../api/programacion.api'
 import { periodosApi } from '../../api/periodos.api'
@@ -478,21 +446,31 @@ const paralelosDisponibles = ref<string[]>([])
 const selectedDocId = ref(0)
 
 // IA
-const iaResultado = ref<any>(null)
+const iaResultados = ref<Array<{ nivel: number; par_id: number; par_nombre: string; resultado: any }>>([])
 const generandoIA = ref(false)
 const confirmandoIA = ref(false)
 const iaError = ref('')
 const iaConfirmado = ref('')
-const nivelesIA = ref<number[]>([])
-const paralelosIA = ref<{ par_id: number; par_nombre: string }[]>([])
-const iaConfig = reactive({
-  nivel: 0,
-  par_id: 0,
-  dias_permitidos: [1, 2, 3, 4, 5] as number[],
-  hora_inicio: 7,
-  hora_fin: 21,
-  duracion_min: 2,
-  duracion_max: 3,
+const labsGlobales = ref<number[]>([])
+const gruposConfig = ref<Record<string, {
+  hora_inicio: number
+  hora_fin: number
+  duracion_min: number
+  duracion_max: number
+  dias_permitidos: number[]
+}>>({})
+
+const combinacionesIA = computed(() => {
+  const unicos = new Map<string, { nivel: number; par_id: number; par_nombre: string }>()
+  for (const p of todaProgramacion.value) {
+    if (p.par_id && p.par_nombre) {
+      const key = `${p.pra_nivel}-${p.par_id}`
+      if (!unicos.has(key)) {
+        unicos.set(key, { nivel: p.pra_nivel, par_id: Number(p.par_id), par_nombre: p.par_nombre })
+      }
+    }
+  }
+  return Array.from(unicos.values()).sort((a, b) => a.nivel - b.nivel || a.par_nombre.localeCompare(b.par_nombre))
 })
 
 const loadingData = ref(false)
@@ -503,12 +481,7 @@ const showAsignarModal = ref(false)
 const selectedDia = ref<Dia | null>(null)
 const selectedHora = ref(0)
 const asignarModalError = ref('')
-const modalForm = reactive({
-  pra_id: 0,
-  hora_inicio: '07:00',
-  hora_fin: '08:00',
-  aul_id: 0,
-})
+const modalForm = reactive({ pra_id: 0, hora_inicio: '07:00', hora_fin: '08:00', aul_id: 0 })
 
 const horas = Array.from({ length: 24 }, (_, i) => i)
 
@@ -530,18 +503,18 @@ function formatHora(h: number): string {
   return `${h.toString().padStart(2, '0')}:00`
 }
 
+function getRowspan(horaInicio: string, horaFin: string): number {
+  const inicio = parseInt(horaInicio.substring(0, 2))
+  const fin = parseInt(horaFin.substring(0, 2))
+  return Math.max(1, fin - inicio)
+}
+
 function getCeldaItems(diaOrden: number, hora: number) {
   const horaStr = formatHora(hora)
   return horarioCompleto.value.filter(h => {
     const horaInicio = h.blq_hora_inicio?.substring(0, 5)
     return Number(h.dia_orden) === diaOrden && horaInicio === horaStr
   })
-}
-
-function getRowspan(horaInicio: string, horaFin: string): number {
-  const inicio = parseInt(horaInicio.substring(0, 2))
-  const fin = parseInt(horaFin.substring(0, 2))
-  return Math.max(1, fin - inicio)
 }
 
 function getCeldaDocente(diaOrden: number, hora: number) {
@@ -552,15 +525,40 @@ function getCeldaDocente(diaOrden: number, hora: number) {
   })
 }
 
-function getCeldaIA(diaOrden: number, hora: number) {
-  if (!iaResultado.value?.horarios) return []
+function getCeldaIAGrupo(horarios: any[], diaOrden: number, hora: number) {
+  if (!horarios) return []
   const horaStr = formatHora(hora)
-  return iaResultado.value.horarios.filter((h: any) => {
+  return horarios.filter((h: any) => {
     const diaItem = dias.value.find(d => Number(d.dia_id) === Number(h.dia_id))
     if (!diaItem) return false
     const horaInicio = h.hora_inicio?.substring(0, 5)
     return Number(diaItem.dia_orden) === diaOrden && horaInicio === horaStr
   })
+}
+
+function getResultadoGrupo(nivel: number, parId: number) {
+  return iaResultados.value.find(r => r.nivel === nivel && r.par_id === parId)
+}
+
+function horasVisibles(nivel: number, parId: number): number[] {
+  const resultado = getResultadoGrupo(nivel, parId)
+  if (!resultado?.resultado?.horarios?.length) return horas
+  const horasEnGrilla = resultado.resultado.horarios.map((h: any) => parseInt(h.hora_inicio?.substring(0, 2)))
+  const minH = Math.max(0, Math.min(...horasEnGrilla) - 1)
+  const maxH = Math.min(23, Math.max(...horasEnGrilla) + 3)
+  return horas.filter(h => h >= minH && h <= maxH)
+}
+
+function initGrupoConfig(key: string) {
+  if (!gruposConfig.value[key]) {
+    gruposConfig.value[key] = {
+      hora_inicio: 7,
+      hora_fin: 21,
+      duracion_min: 2,
+      duracion_max: 3,
+      dias_permitidos: [1, 2, 3, 4, 5],
+    }
+  }
 }
 
 onMounted(async () => {
@@ -608,10 +606,8 @@ async function onCarreraChange() {
   horarioCompleto.value = []
   nivelesDisponibles.value = []
   paralelosDisponibles.value = []
-  nivelesIA.value = []
-  iaConfig.nivel = 0
-  iaConfig.par_id = 0
-  paralelosIA.value = []
+  iaResultados.value = []
+  gruposConfig.value = {}
 
   if (!filters.per_id || !filters.car_id) return
 
@@ -620,7 +616,14 @@ async function onCarreraChange() {
     todaProgramacion.value = progRes.data
     const niveles = [...new Set(progRes.data.map(p => p.pra_nivel))].sort((a, b) => a - b)
     nivelesDisponibles.value = niveles
-    nivelesIA.value = niveles
+
+    // Inicializar config para cada combinacion
+    for (const p of progRes.data) {
+      if (p.par_id && p.par_nombre) {
+        const key = `${p.pra_nivel}-${p.par_id}`
+        initGrupoConfig(key)
+      }
+    }
   } catch (error) {
     console.error('Error cargando programacion:', error)
   }
@@ -630,46 +633,21 @@ function onNivelChange() {
   filters.paralelo = ''
   programacion.value = []
   horarioCompleto.value = []
-
-  if (!filters.nivel) {
-    paralelosDisponibles.value = []
-    return
-  }
-
+  if (!filters.nivel) { paralelosDisponibles.value = []; return }
   const paralelos = [...new Set(
-    todaProgramacion.value
-      .filter(p => p.pra_nivel === filters.nivel)
-      .map(p => p.par_nombre ?? '')
-      .filter(p => p !== '')
+    todaProgramacion.value.filter(p => p.pra_nivel === filters.nivel)
+      .map(p => p.par_nombre ?? '').filter(p => p !== '')
   )].sort()
   paralelosDisponibles.value = paralelos
 }
 
-function onNivelIAChange() {
-  iaConfig.par_id = 0
-  paralelosIA.value = []
-
-  if (!iaConfig.nivel) return
-
-  const filtrados = todaProgramacion.value.filter(p => p.pra_nivel === iaConfig.nivel)
-  const unicos = new Map<number, string>()
-  for (const p of filtrados) {
-    if (p.par_id && p.par_nombre) {
-      unicos.set(Number(p.par_id), p.par_nombre)
-    }
-  }
-  paralelosIA.value = Array.from(unicos, ([par_id, par_nombre]) => ({ par_id, par_nombre }))
-}
-
 async function loadData() {
   if (!filters.per_id || !filters.car_id || !filters.nivel || !filters.paralelo) return
-
   loadingData.value = true
   try {
     programacion.value = todaProgramacion.value.filter(
       p => p.pra_nivel === filters.nivel && p.par_nombre === filters.paralelo
     )
-
     const horRes = await horariosApi.getHorarioCompleto(Number(filters.per_id), Number(filters.car_id))
     horarioCompleto.value = horRes.data.filter(
       h => h.pra_nivel === filters.nivel && h.par_nombre === filters.paralelo
@@ -693,20 +671,11 @@ function handleCeldaClick(dia: Dia, hora: number) {
 }
 
 async function handleAsignar() {
-  if (!modalForm.pra_id || !selectedDia.value) {
-    asignarModalError.value = 'Seleccione una materia'
-    return
-  }
-
+  if (!modalForm.pra_id || !selectedDia.value) { asignarModalError.value = 'Seleccione una materia'; return }
   saving.value = true
   asignarModalError.value = ''
-
   try {
-    const { blq_id_inicio, blq_id_fin } = await findOrCreateBloque(
-      modalForm.hora_inicio,
-      modalForm.hora_fin
-    )
-
+    const { blq_id_inicio, blq_id_fin } = await findOrCreateBloque(modalForm.hora_inicio, modalForm.hora_fin)
     await horariosApi.create({
       pra_id: Number(modalForm.pra_id),
       dia_id: Number(selectedDia.value.dia_id),
@@ -723,111 +692,84 @@ async function handleAsignar() {
   }
 }
 
-async function findOrCreateBloque(
-  horaInicio: string,
-  horaFin: string
-): Promise<{ blq_id_inicio: number; blq_id_fin: number }> {
+async function findOrCreateBloque(horaInicio: string, horaFin: string): Promise<{ blq_id_inicio: number; blq_id_fin: number }> {
   const bloquesRes = await horariosApi.getBloques()
-
-  let bloqueInicio = bloquesRes.data.find(
-    b => b.blq_hora_inicio.substring(0, 5) === horaInicio
-  )
+  let bloqueInicio = bloquesRes.data.find(b => b.blq_hora_inicio.substring(0, 5) === horaInicio)
   if (!bloqueInicio) {
-    const orden = bloquesRes.data.length + 1
     const res = await api.post('/programacion-academica/bloques-horarios', {
-      blq_hora_inicio: horaInicio,
-      blq_hora_fin: horaFin,
-      blq_descripcion: `${horaInicio} - ${horaFin}`,
-      blq_orden: orden,
+      blq_hora_inicio: horaInicio, blq_hora_fin: horaFin,
+      blq_descripcion: `${horaInicio} - ${horaFin}`, blq_orden: bloquesRes.data.length + 1,
     })
     bloqueInicio = res.data.bloque
   }
-
-  let bloqueFin = bloquesRes.data.find(
-    b => b.blq_hora_fin.substring(0, 5) === horaFin
-  )
+  let bloqueFin = bloquesRes.data.find(b => b.blq_hora_fin.substring(0, 5) === horaFin)
   if (!bloqueFin) {
     const bloquesActualizados = await horariosApi.getBloques()
-    const orden = bloquesActualizados.data.length + 1
     const res = await api.post('/programacion-academica/bloques-horarios', {
-      blq_hora_inicio: horaInicio,
-      blq_hora_fin: horaFin,
-      blq_descripcion: `${horaInicio} - ${horaFin}`,
-      blq_orden: orden,
+      blq_hora_inicio: horaInicio, blq_hora_fin: horaFin,
+      blq_descripcion: `${horaInicio} - ${horaFin}`, blq_orden: bloquesActualizados.data.length + 1,
     })
     bloqueFin = res.data.bloque
   }
-
-  return {
-    blq_id_inicio: bloqueInicio!.blq_id,
-    blq_id_fin: bloqueFin!.blq_id,
-  }
+  return { blq_id_inicio: bloqueInicio!.blq_id, blq_id_fin: bloqueFin!.blq_id }
 }
 
 async function deleteHorarioGrilla(horId: number) {
-  try {
-    await horariosApi.delete(horId)
-    await loadData()
-  } catch (error) {
-    console.error('Error eliminando horario:', error)
-  }
+  try { await horariosApi.delete(horId); await loadData() } catch (error) { console.error(error) }
 }
 
 async function loadHorarioDocente() {
-  if (!selectedDocId.value || !filters.per_id) {
-    horarioDocente.value = []
-    return
-  }
-
+  if (!selectedDocId.value || !filters.per_id) { horarioDocente.value = []; return }
   loadingDocente.value = true
   try {
-    const response = await horariosApi.getHorarioDocente(
-      Number(selectedDocId.value),
-      Number(filters.per_id)
-    )
+    const response = await horariosApi.getHorarioDocente(Number(selectedDocId.value), Number(filters.per_id))
     horarioDocente.value = response.data
-  } catch (error) {
-    console.error('Error cargando horario docente:', error)
-  } finally {
-    loadingDocente.value = false
-  }
+  } catch (error) { console.error(error) } finally { loadingDocente.value = false }
+}
+
+async function generarParaCombo(combo: { nivel: number; par_id: number; par_nombre: string }) {
+  const key = `${combo.nivel}-${combo.par_id}`
+  const config = gruposConfig.value[key] || { hora_inicio: 7, hora_fin: 21, duracion_min: 2, duracion_max: 3, dias_permitidos: [1, 2, 3, 4, 5] }
+  const escId = miEscuela.value ? Number(miEscuela.value.esc_id) : 0
+
+  // Recopilar horarios ya generados de grupos anteriores para evitar cruce de labs
+  const horariosPrevios = iaResultados.value.flatMap(r => r.resultado?.horarios || [])
+
+  const response = await horariosApi.generarIA({
+    per_id: Number(filters.per_id),
+    car_id: Number(filters.car_id),
+    esc_id: escId,
+    nivel: combo.nivel,
+    par_id: combo.par_id,
+    dias_permitidos: config.dias_permitidos.map(Number),
+    hora_inicio: Number(config.hora_inicio),
+    hora_fin: Number(config.hora_fin),
+    duracion_min: Number(config.duracion_min),
+    duracion_max: Number(config.duracion_max),
+    laboratorios_disponibles: labsGlobales.value.map(Number),
+    horarios_previos: horariosPrevios,
+  })
+
+  return { nivel: combo.nivel, par_id: combo.par_id, par_nombre: combo.par_nombre, resultado: response.data.resultado }
 }
 
 async function handleGenerarIA() {
-  if (!filters.per_id || !filters.car_id) return
-  if (!iaConfig.nivel || !iaConfig.par_id) {
-    iaError.value = 'Seleccione nivel y paralelo para generar'
-    return
-  }
-  if (iaConfig.dias_permitidos.length === 0) {
-    iaError.value = 'Seleccione al menos un dia'
-    return
-  }
-  if (iaConfig.hora_inicio >= iaConfig.hora_fin) {
-    iaError.value = 'La hora de inicio debe ser menor a la hora de fin'
-    return
-  }
-
+  if (!filters.per_id || !filters.car_id || combinacionesIA.value.length === 0) return
   generandoIA.value = true
   iaError.value = ''
-  iaResultado.value = null
+  iaResultados.value = []
   iaConfirmado.value = ''
 
   try {
-    const escId = miEscuela.value ? Number(miEscuela.value.esc_id) : 0
-    const response = await horariosApi.generarIA({
-      per_id: Number(filters.per_id),
-      car_id: Number(filters.car_id),
-      esc_id: escId,
-      nivel: Number(iaConfig.nivel),
-      par_id: Number(iaConfig.par_id),
-      dias_permitidos: iaConfig.dias_permitidos.map(Number),
-      hora_inicio: Number(iaConfig.hora_inicio),
-      hora_fin: Number(iaConfig.hora_fin),
-      duracion_min: Number(iaConfig.duracion_min),
-      duracion_max: Number(iaConfig.duracion_max),
-    })
-    iaResultado.value = response.data.resultado
+    for (const combo of combinacionesIA.value) {
+      try {
+        const resultado = await generarParaCombo(combo)
+        iaResultados.value.push(resultado)
+      } catch {
+        iaError.value = `Error generando Nivel ${combo.nivel} - Paralelo ${combo.par_nombre}`
+      }
+    }
+    iaResultados.value.sort((a, b) => a.nivel - b.nivel || a.par_nombre.localeCompare(b.par_nombre))
   } catch (err: any) {
     iaError.value = err.response?.data?.message || 'Error al generar horarios'
   } finally {
@@ -835,35 +777,56 @@ async function handleGenerarIA() {
   }
 }
 
+async function handleGenerarGrupo(combo: { nivel: number; par_id: number; par_nombre: string }) {
+  generandoIA.value = true
+  iaError.value = ''
+  try {
+    const resultado = await generarParaCombo(combo)
+    const idx = iaResultados.value.findIndex(r => r.nivel === combo.nivel && r.par_id === combo.par_id)
+    if (idx > -1) iaResultados.value[idx] = resultado
+    else iaResultados.value.push(resultado)
+    iaResultados.value.sort((a, b) => a.nivel - b.nivel || a.par_nombre.localeCompare(b.par_nombre))
+  } catch (err: any) {
+    iaError.value = err.response?.data?.message || 'Error al generar'
+  } finally {
+    generandoIA.value = false
+  }
+}
+
+async function handleRegenerarGrupo(combo: { nivel: number; par_id: number; par_nombre: string }) {
+  const idx = iaResultados.value.findIndex(r => r.nivel === combo.nivel && r.par_id === combo.par_id)
+  if (idx > -1) iaResultados.value.splice(idx, 1)
+  await handleGenerarGrupo(combo)
+}
+
 async function handleRegenerarIA() {
-  iaResultado.value = null
+  iaResultados.value = []
   await handleGenerarIA()
 }
 
 async function handleConfirmarIA() {
-  if (!iaResultado.value?.horarios) return
-
+  if (iaResultados.value.length === 0) return
   confirmandoIA.value = true
   iaConfirmado.value = ''
   iaError.value = ''
-
   try {
+    const todosLosHorarios = iaResultados.value.flatMap(r => r.resultado?.horarios || [])
     const response = await horariosApi.confirmarIA({
       per_id: Number(filters.per_id),
       car_id: Number(filters.car_id),
-      horarios: iaResultado.value.horarios,
+      horarios: todosLosHorarios,
     })
     iaConfirmado.value = response.data.message
     await loadData()
   } catch (err: any) {
-    iaError.value = err.response?.data?.message || 'Error al confirmar horarios'
+    iaError.value = err.response?.data?.message || 'Error al confirmar'
   } finally {
     confirmandoIA.value = false
   }
 }
 
 function handleLimpiarIA() {
-  iaResultado.value = null
+  iaResultados.value = []
   iaConfirmado.value = ''
   iaError.value = ''
 }

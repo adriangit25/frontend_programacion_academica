@@ -119,6 +119,8 @@ export const horariosApi = {
     hora_fin: number;
     duracion_min: number;
     duracion_max: number;
+    laboratorios_disponibles?: number[];
+    horarios_previos?: any[];
   }) {
     return api.post("/programacion-academica/ia/generar-horarios", data);
   },
