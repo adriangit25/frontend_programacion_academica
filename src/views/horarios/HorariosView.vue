@@ -184,7 +184,7 @@
                 <i class="pi pi-bolt text-white"></i>
               </div>
               <div>
-                <h2 class="text-lg font-semibold text-gray-800">Generar Horarios con Algoritmo Genetico</h2>
+                <h2 class="text-lg font-semibold text-gray-800">Generar Horarios con Inteligencia Artificial (Algoritmo Genético)</h2>
                 <p class="text-sm text-gray-500">Configure cada nivel y paralelo de forma independiente</p>
               </div>
             </div>
@@ -325,6 +325,7 @@
                               overflow: 'hidden', zIndex: 10, padding: '4px 6px',
                             }">
                             <p class="text-xs font-semibold leading-tight" :style="{ color: getColorMateria(item.mat_nombre) }">{{ item.mat_nombre }}</p>
+                            <p class="text-xs text-gray-600 leading-tight truncate">{{ item.doc_nombre || 'Sin docente' }}</p>
                             <p class="text-xs text-gray-500 leading-tight">{{ item.duracion }}h</p>
                             <p v-if="item.aul_sugerida" class="text-xs text-gray-400 leading-tight truncate">
                               <i class="pi pi-building text-xs mr-1"></i>{{ item.aul_sugerida.aul_nombre }}

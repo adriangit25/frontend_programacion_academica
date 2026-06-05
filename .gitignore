@@ -31,3 +31,18 @@ dist/
 .env.production
 
 .vscode/
+
+docker-compose.yml
+
+Dockerfile
+
+.env.production
+
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+tsconfig.app.json
+tsconfig.json
+tsconfig.node.json
