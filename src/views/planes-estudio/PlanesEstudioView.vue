@@ -8,10 +8,10 @@
     <!-- Paso 1: Seleccionar Carrera -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
       <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Carrera</label>
-      <select v-model.number="selectedCarreraId" @change="loadPlanes" class="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+      <select v-model.number="selectedCarreraId" @change="loadPlanes"
+        class="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
         <option value="0">-- Seleccione una carrera --</option>
-        <option v-for="carrera in carreras" :key="carrera.car_id" :value="carrera.car_id">
-          {{ carrera.car_nombre }}
+        <option v-for="carrera in carreras" :key="carrera.car_id" :value="carrera.car_id">{{ carrera.car_nombre }}
         </option>
       </select>
     </div>
@@ -20,40 +20,34 @@
     <div v-if="selectedCarreraId" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-800">Planes de Estudio</h2>
-        <button @click="openPlanModal()" class="flex items-center gap-2 bg-blue-900 text-white px-3 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
-          <i class="pi pi-plus"></i>
-          Nuevo Plan
+        <button @click="openPlanModal()"
+          class="flex items-center gap-2 bg-blue-900 text-white px-3 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+          <i class="pi pi-plus"></i>Nuevo Plan
         </button>
       </div>
-
       <div v-if="loadingPlanes" class="text-gray-400 text-sm py-4">Cargando...</div>
-      <div v-else-if="planes.length === 0" class="text-gray-400 text-sm py-4">No hay planes de estudio para esta carrera</div>
+      <div v-else-if="planes.length === 0" class="text-gray-400 text-sm py-4">No hay planes de estudio para esta carrera
+      </div>
       <div v-else class="space-y-2">
-        <div
-          v-for="plan in planes"
-          :key="plan.pln_id"
-          @click="selectPlan(plan)"
+        <div v-for="plan in planes" :key="plan.pln_id" @click="selectPlan(plan)"
           :class="['flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer transition',
-            selectedPlan?.pln_id === plan.pln_id ? 'bg-blue-50 border-blue-300' : 'bg-gray-50 border-gray-200 hover:bg-gray-100']"
-        >
+            selectedPlan?.pln_id === plan.pln_id ? 'bg-blue-50 border-blue-300' : 'bg-gray-50 border-gray-200 hover:bg-gray-100']">
           <div>
             <p class="text-sm font-medium text-gray-800">{{ plan.pln_nombre }}</p>
             <p class="text-xs text-gray-500">{{ plan.pln_codigo }} - Anio: {{ plan.pln_anio }}</p>
           </div>
           <div class="flex items-center gap-2">
-            <button @click.stop="openPlanModal(plan)" class="text-blue-600 hover:text-blue-800 transition">
-              <i class="pi pi-pencil text-sm"></i>
-            </button>
-            <button @click.stop="confirmDeletePlan(plan)" class="text-red-600 hover:text-red-800 transition">
-              <i class="pi pi-trash text-sm"></i>
-            </button>
+            <button @click.stop="openPlanModal(plan)" class="text-blue-600 hover:text-blue-800 transition"><i
+                class="pi pi-pencil text-sm"></i></button>
+            <button @click.stop="confirmDeletePlan(plan)" class="text-red-600 hover:text-red-800 transition"><i
+                class="pi pi-trash text-sm"></i></button>
             <i class="pi pi-chevron-right text-gray-400"></i>
           </div>
         </div>
       </div>
     </div>
 
-<!-- Paso 3: Materias del Plan Seleccionado -->
+    <!-- Paso 3: Materias del Plan Seleccionado -->
     <div v-if="selectedPlan" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
@@ -63,11 +57,12 @@
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2">
             <label class="text-sm text-gray-600">Nivel:</label>
-            <input v-model.number="selectedNivel" type="number" min="1" class="w-16 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm text-center" />
+            <input v-model.number="selectedNivel" type="number" min="1"
+              class="w-16 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm text-center" />
           </div>
-          <button @click="openMateriaModal()" class="flex items-center gap-2 bg-blue-900 text-white px-3 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
-            <i class="pi pi-plus"></i>
-            Agregar Materia al Nivel {{ selectedNivel }}
+          <button @click="openMateriaModal()"
+            class="flex items-center gap-2 bg-blue-900 text-white px-3 py-2 rounded-lg hover:bg-blue-800 transition text-sm">
+            <i class="pi pi-plus"></i>Agregar Materia al Nivel {{ selectedNivel }}
           </button>
         </div>
       </div>
@@ -76,9 +71,15 @@
       <div v-else-if="materias.length === 0" class="text-gray-400 text-sm py-4">No hay materias en este plan</div>
       <div v-else>
         <div v-for="nivel in nivelesConMaterias" :key="nivel" class="mb-6">
-          <h3 class="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
-            <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-xs">Nivel {{ nivel }}</span>
-          </h3>
+          <!-- Encabezado nivel con botón eliminar -->
+          <div class="flex items-center justify-between mb-2">
+            <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-xs font-medium">Nivel {{ nivel }}</span>
+            <button @click="confirmarEliminarNivel(nivel)"
+              class="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs hover:bg-red-100 transition">
+              <i class="pi pi-trash text-xs"></i>
+              Eliminar Nivel {{ nivel }}
+            </button>
+          </div>
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
@@ -95,7 +96,8 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
-                <tr v-for="materia in getMateriasByNivel(nivel)" :key="materia.mat_id" class="hover:bg-gray-50 transition">
+                <tr v-for="materia in getMateriasByNivel(nivel)" :key="materia.mat_id"
+                  class="hover:bg-gray-50 transition">
                   <td class="px-4 py-3 text-sm text-gray-700">{{ materia.mat_codigo }}</td>
                   <td class="px-4 py-3 text-sm text-gray-700">{{ materia.mat_nombre }}</td>
                   <td class="px-4 py-3 text-sm text-gray-500">{{ materia.arc_nombre || '-' }}</td>
@@ -108,15 +110,12 @@
                     P: {{ (materia.mat_horas_practicas / 16).toFixed(1) }} |
                     A: {{ (materia.mat_horas_autonomas / 16).toFixed(1) }}
                   </td>
-                  
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
-                      <button @click="openMateriaModal(materia)" class="text-blue-600 hover:text-blue-800 transition">
-                        <i class="pi pi-pencil text-sm"></i>
-                      </button>
-                      <button @click="confirmDeleteMateria(materia)" class="text-red-600 hover:text-red-800 transition">
-                        <i class="pi pi-trash text-sm"></i>
-                      </button>
+                      <button @click="openMateriaModal(materia)" class="text-blue-600 hover:text-blue-800 transition"><i
+                          class="pi pi-pencil text-sm"></i></button>
+                      <button @click="confirmDeleteMateria(materia)"
+                        class="text-red-600 hover:text-red-800 transition"><i class="pi pi-trash text-sm"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -131,42 +130,43 @@
     <div v-if="showPlanModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-800">{{ editingPlan ? 'Editar Plan' : 'Nuevo Plan de Estudio' }}</h2>
-          <button @click="showPlanModal = false" class="text-gray-400 hover:text-gray-600">
-            <i class="pi pi-times"></i>
-          </button>
+          <h2 class="text-lg font-semibold text-gray-800">{{ editingPlan ? 'Editar Plan' : 'Nuevo Plan de Estudio' }}
+          </h2>
+          <button @click="showPlanModal = false" class="text-gray-400 hover:text-gray-600"><i
+              class="pi pi-times"></i></button>
         </div>
-
-        <div v-if="planError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-          {{ planError }}
-        </div>
-
+        <div v-if="planError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{{
+          planError }}</div>
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Codigo</label>
-              <input v-model="planForm.pln_codigo" type="text" placeholder="Ej: PEN-2020" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+              <input v-model="planForm.pln_codigo" type="text" placeholder="Ej: PEN-2020"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Anio</label>
-              <input v-model.number="planForm.pln_anio" type="number" placeholder="2020" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+              <input v-model.number="planForm.pln_anio" type="number" placeholder="2020"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-            <input v-model="planForm.pln_nombre" type="text" placeholder="Ej: Pensum 2020" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+            <input v-model="planForm.pln_nombre" type="text" placeholder="Ej: Pensum 2020"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
-            <textarea v-model="planForm.pln_descripcion" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"></textarea>
+            <textarea v-model="planForm.pln_descripcion" rows="2"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"></textarea>
           </div>
         </div>
-
         <div class="flex justify-end gap-3 mt-6">
-          <button @click="showPlanModal = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
-          <button @click="handleSubmitPlan" :disabled="saving" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50">
-            {{ saving ? 'Guardando...' : 'Guardar' }}
-          </button>
+          <button @click="showPlanModal = false"
+            class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
+          <button @click="handleSubmitPlan" :disabled="saving"
+            class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50">{{
+              saving ? 'Guardando...' : 'Guardar' }}</button>
         </div>
       </div>
     </div>
@@ -176,70 +176,71 @@
       <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-gray-800">{{ editingMateria ? 'Editar Materia' : 'Nueva Materia' }}</h2>
-          <button @click="showMateriaModal = false" class="text-gray-400 hover:text-gray-600">
-            <i class="pi pi-times"></i>
-          </button>
+          <button @click="showMateriaModal = false" class="text-gray-400 hover:text-gray-600"><i
+              class="pi pi-times"></i></button>
         </div>
-
         <div v-if="materiaError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-          {{ materiaError }}
-        </div>
-
+          {{ materiaError }}</div>
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Codigo</label>
-              <input v-model="materiaForm.mat_codigo" type="text" placeholder="Ej: MAT-101" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+              <input v-model="materiaForm.mat_codigo" type="text" placeholder="Ej: MAT-101"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
-              <input v-model.number="materiaForm.mat_nivel" type="number" min="1" placeholder="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+              <input v-model.number="materiaForm.mat_nivel" type="number" min="1" placeholder="1"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Materia</label>
-            <input v-model="materiaForm.mat_nombre" type="text" placeholder="Ej: Calculo Diferencial" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+            <input v-model="materiaForm.mat_nombre" type="text" placeholder="Ej: Calculo Diferencial"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Area de Conocimiento</label>
-            <select v-model.number="materiaForm.arc_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+            <select v-model.number="materiaForm.arc_id"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
               <option value="0">-- Seleccione un area --</option>
-              <option v-for="area in areas" :key="area.arc_id" :value="area.arc_id">
-                {{ area.arc_nombre }}
-              </option>
+              <option v-for="area in areas" :key="area.arc_id" :value="area.arc_id">{{ area.arc_nombre }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
-            <textarea v-model="materiaForm.mat_descripcion" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"></textarea>
+            <textarea v-model="materiaForm.mat_descripcion" rows="2"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"></textarea>
           </div>
           <div class="grid grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Horas Docencia</label>
-              <input v-model.number="materiaForm.mat_horas_docencia" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+              <input v-model.number="materiaForm.mat_horas_docencia" type="number" min="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Horas Practicas</label>
-              <input v-model.number="materiaForm.mat_horas_practicas" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+              <input v-model.number="materiaForm.mat_horas_practicas" type="number" min="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Horas Autonomas</label>
-              <input v-model.number="materiaForm.mat_horas_autonomas" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+              <input v-model.number="materiaForm.mat_horas_autonomas" type="number" min="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Total Horas</label>
-            <div class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 font-medium">
-              {{ totalHorasCalculado }}
-            </div>
+            <div class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 font-medium">{{
+              totalHorasCalculado }}</div>
           </div>
         </div>
-
         <div class="flex justify-end gap-3 mt-6">
-          <button @click="showMateriaModal = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
-          <button @click="handleSubmitMateria" :disabled="saving" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50">
-            {{ saving ? 'Guardando...' : 'Guardar' }}
-          </button>
+          <button @click="showMateriaModal = false"
+            class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
+          <button @click="handleSubmitMateria" :disabled="saving"
+            class="px-4 py-2 bg-blue-900 text-white rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50">{{
+              saving ? 'Guardando...' : 'Guardar' }}</button>
         </div>
       </div>
     </div>
@@ -250,12 +251,14 @@
         <div class="text-center">
           <i class="pi pi-exclamation-triangle text-4xl text-amber-500 mb-3"></i>
           <h2 class="text-lg font-semibold text-gray-800 mb-2">Confirmar eliminacion</h2>
-          <p class="text-sm text-gray-500 mb-6">Desea eliminar el plan <strong>{{ deletingPlan?.pln_nombre }}</strong>?</p>
+          <p class="text-sm text-gray-500 mb-6">Desea eliminar el plan <strong>{{ deletingPlan?.pln_nombre }}</strong>?
+          </p>
           <div class="flex justify-center gap-3">
-            <button @click="showDeletePlanModal = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
-            <button @click="handleDeletePlan" :disabled="saving" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50">
-              {{ saving ? 'Eliminando...' : 'Eliminar' }}
-            </button>
+            <button @click="showDeletePlanModal = false"
+              class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
+            <button @click="handleDeletePlan" :disabled="saving"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50">{{
+                saving ? 'Eliminando...' : 'Eliminar' }}</button>
           </div>
         </div>
       </div>
@@ -267,13 +270,47 @@
         <div class="text-center">
           <i class="pi pi-exclamation-triangle text-4xl text-amber-500 mb-3"></i>
           <h2 class="text-lg font-semibold text-gray-800 mb-2">Confirmar eliminacion</h2>
-          <p class="text-sm text-gray-500 mb-6">Desea eliminar la materia <strong>{{ deletingMateria?.mat_nombre }}</strong>?</p>
+          <p class="text-sm text-gray-500 mb-6">Desea eliminar la materia <strong>{{ deletingMateria?.mat_nombre
+              }}</strong>?</p>
           <div class="flex justify-center gap-3">
-            <button @click="showDeleteMateriaModal = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
-            <button @click="handleDeleteMateria" :disabled="saving" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50">
-              {{ saving ? 'Eliminando...' : 'Eliminar' }}
-            </button>
+            <button @click="showDeleteMateriaModal = false"
+              class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
+            <button @click="handleDeleteMateria" :disabled="saving"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50">{{
+                saving ? 'Eliminando...' : 'Eliminar' }}</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Confirmar Eliminar Nivel NUEVO -->
+    <div v-if="showDeleteNivelModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="pi pi-exclamation-triangle text-red-600"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-800">Eliminar Nivel {{ nivelAEliminar }}</h2>
+            <p class="text-sm text-gray-500">Esta accion no se puede deshacer</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-6">
+          Se eliminaran todas las materias del
+          <strong>Nivel {{ nivelAEliminar }}</strong>
+          del plan <strong>{{ selectedPlan?.pln_nombre }}</strong> permanentemente de la base de datos.
+        </p>
+        <div v-if="deleteNivelError"
+          class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{{ deleteNivelError }}
+        </div>
+        <div class="flex justify-end gap-3">
+          <button @click="showDeleteNivelModal = false"
+            class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">Cancelar</button>
+          <button @click="handleEliminarNivel" :disabled="eliminandoNivel"
+            class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50">
+            <i :class="['pi', eliminandoNivel ? 'pi-spin pi-spinner' : 'pi-trash']"></i>
+            {{ eliminandoNivel ? 'Eliminando...' : 'Si, Eliminar Nivel' }}
+          </button>
         </div>
       </div>
     </div>
@@ -348,17 +385,45 @@ const materiaForm = reactive<CreateMateriaRequest>({
   mat_estado: true,
 })
 
+// Eliminar nivel NUEVO
+const showDeleteNivelModal = ref(false)
+const nivelAEliminar = ref<number | null>(null)
+const eliminandoNivel = ref(false)
+const deleteNivelError = ref('')
+
 const totalHorasCalculado = computed(() => {
   return (materiaForm.mat_horas_docencia || 0) + (materiaForm.mat_horas_practicas || 0) + (materiaForm.mat_horas_autonomas || 0)
 })
 
 const nivelesConMaterias = computed(() => {
-  const niveles = [...new Set(materias.value.map(m => m.mat_nivel))].sort((a, b) => a - b)
-  return niveles
+  return [...new Set(materias.value.map(m => m.mat_nivel))].sort((a, b) => a - b)
 })
 
 function getMateriasByNivel(nivel: number) {
   return materias.value.filter(m => m.mat_nivel === nivel)
+}
+
+// Funciones eliminar nivel NUEVO
+function confirmarEliminarNivel(nivel: number) {
+  nivelAEliminar.value = nivel
+  deleteNivelError.value = ''
+  showDeleteNivelModal.value = true
+}
+
+async function handleEliminarNivel() {
+  if (!nivelAEliminar.value || !selectedPlan.value) return
+  eliminandoNivel.value = true
+  deleteNivelError.value = ''
+  try {
+    await materiasApi.deleteNivel(Number(selectedPlan.value.pln_id), nivelAEliminar.value)
+    showDeleteNivelModal.value = false
+    nivelAEliminar.value = null
+    await selectPlan(selectedPlan.value)
+  } catch (err: any) {
+    deleteNivelError.value = err.response?.data?.message || 'Error al eliminar el nivel'
+  } finally {
+    eliminandoNivel.value = false
+  }
 }
 
 onMounted(async () => {
@@ -390,21 +455,13 @@ onMounted(async () => {
 async function loadPlanes() {
   selectedPlan.value = null
   materias.value = []
-
-  if (!selectedCarreraId.value) {
-    planes.value = []
-    return
-  }
-
+  if (!selectedCarreraId.value) { planes.value = []; return }
   loadingPlanes.value = true
   try {
     const response = await planesEstudioApi.getByCarrera(Number(selectedCarreraId.value))
     planes.value = response.data
-  } catch (error) {
-    console.error('Error cargando planes:', error)
-  } finally {
-    loadingPlanes.value = false
-  }
+  } catch (error) { console.error('Error cargando planes:', error) }
+  finally { loadingPlanes.value = false }
 }
 
 async function selectPlan(plan: PlanEstudio) {
@@ -413,11 +470,8 @@ async function selectPlan(plan: PlanEstudio) {
   try {
     const response = await materiasApi.getByPlan(Number(plan.pln_id))
     materias.value = response.data
-  } catch (error) {
-    console.error('Error cargando materias:', error)
-  } finally {
-    loadingMaterias.value = false
-  }
+  } catch (error) { console.error('Error cargando materias:', error) }
+  finally { loadingMaterias.value = false }
 }
 
 // ==================== PLAN ====================
@@ -447,25 +501,16 @@ async function handleSubmitPlan() {
     planError.value = 'El codigo, nombre y anio son obligatorios'
     return
   }
-
   planForm.car_id = Number(selectedCarreraId.value)
-
   saving.value = true
   planError.value = ''
-
   try {
-    if (editingPlan.value) {
-      await planesEstudioApi.update(editingPlan.value.pln_id, planForm)
-    } else {
-      await planesEstudioApi.create(planForm)
-    }
+    if (editingPlan.value) await planesEstudioApi.update(editingPlan.value.pln_id, planForm)
+    else await planesEstudioApi.create(planForm)
     showPlanModal.value = false
     await loadPlanes()
-  } catch (err: any) {
-    planError.value = err.response?.data?.message || 'Error al guardar'
-  } finally {
-    saving.value = false
-  }
+  } catch (err: any) { planError.value = err.response?.data?.message || 'Error al guardar' }
+  finally { saving.value = false }
 }
 
 function confirmDeletePlan(plan: PlanEstudio) {
@@ -480,17 +525,11 @@ async function handleDeletePlan() {
   try {
     await planesEstudioApi.delete(deletingId)
     showDeletePlanModal.value = false
-    if (selectedPlan.value?.pln_id === deletingId) {
-      selectedPlan.value = null
-      materias.value = []
-    }
+    if (selectedPlan.value?.pln_id === deletingId) { selectedPlan.value = null; materias.value = [] }
     deletingPlan.value = null
     await loadPlanes()
-  } catch (err: any) {
-    console.error('Error eliminando:', err)
-  } finally {
-    saving.value = false
-  }
+  } catch (err: any) { console.error('Error eliminando:', err) }
+  finally { saving.value = false }
 }
 
 // ==================== MATERIA ====================
@@ -532,27 +571,18 @@ async function handleSubmitMateria() {
     materiaError.value = 'El codigo, nombre, nivel y area son obligatorios'
     return
   }
-
   materiaForm.pln_id = Number(selectedPlan.value?.pln_id) || 0
   materiaForm.mat_total_horas = totalHorasCalculado.value
   materiaForm.mat_estudiantes_estimado = 0
-
   saving.value = true
   materiaError.value = ''
-
   try {
-    if (editingMateria.value) {
-      await materiasApi.update(editingMateria.value.mat_id, materiaForm)
-    } else {
-      await materiasApi.create(materiaForm)
-    }
+    if (editingMateria.value) await materiasApi.update(editingMateria.value.mat_id, materiaForm)
+    else await materiasApi.create(materiaForm)
     showMateriaModal.value = false
     await selectPlan(selectedPlan.value!)
-  } catch (err: any) {
-    materiaError.value = err.response?.data?.message || 'Error al guardar'
-  } finally {
-    saving.value = false
-  }
+  } catch (err: any) { materiaError.value = err.response?.data?.message || 'Error al guardar' }
+  finally { saving.value = false }
 }
 
 function confirmDeleteMateria(materia: Materia) {
@@ -568,10 +598,7 @@ async function handleDeleteMateria() {
     showDeleteMateriaModal.value = false
     deletingMateria.value = null
     await selectPlan(selectedPlan.value!)
-  } catch (err: any) {
-    console.error('Error eliminando:', err)
-  } finally {
-    saving.value = false
-  }
+  } catch (err: any) { console.error('Error eliminando:', err) }
+  finally { saving.value = false }
 }
 </script>

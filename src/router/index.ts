@@ -15,10 +15,7 @@ const router = createRouter({
       component: AppLayout,
       meta: { requiresAuth: true },
       children: [
-        {
-          path: "",
-          redirect: "/dashboard",
-        },
+        { path: "", redirect: "/dashboard" },
         {
           path: "dashboard",
           name: "dashboard",
@@ -38,8 +35,8 @@ const router = createRouter({
           meta: { title: "Roles", requiresAuth: true },
         },
         {
-          path: "usuario-rol",
-          name: "usuario-rol",
+          path: "asignar-rol", 
+          name: "asignar-rol",
           component: () => import("../views/usuario-rol/AsignarRolView.vue"),
           meta: { title: "Asignar Roles", requiresAuth: true },
         },
@@ -50,10 +47,17 @@ const router = createRouter({
           meta: { title: "Menus", requiresAuth: true },
         },
         {
-          path: "rol-menu",
-          name: "rol-menu",
+          path: "asignar-menu-rol", 
+          name: "asignar-menu-rol",
           component: () => import("../views/rol-menu/AsignarMenuRolView.vue"),
           meta: { title: "Asignar Menus", requiresAuth: true },
+        },
+        {
+          path: "coordinadores",
+          name: "coordinadores",
+          component: () =>
+            import("../views/coordinadores/CoordinadoresView.vue"),
+          meta: { title: "Coordinadores", requiresAuth: true },
         },
         {
           path: "escuelas",
@@ -75,17 +79,11 @@ const router = createRouter({
           meta: { title: "Areas de Conocimiento", requiresAuth: true },
         },
         {
-          path: "coordinadores",
-          name: "coordinadores",
+          path: "planes-estudio",
+          name: "planes-estudio",
           component: () =>
-            import("../views/coordinadores/CoordinadoresView.vue"),
-          meta: { title: "Coordinadores", requiresAuth: true },
-        },
-        {
-          path: "aulas",
-          name: "aulas",
-          component: () => import("../views/aulas/AulasListView.vue"),
-          meta: { title: "Aulas", requiresAuth: true },
+            import("../views/planes-estudio/PlanesEstudioView.vue"),
+          meta: { title: "Planes de Estudio", requiresAuth: true },
         },
         {
           path: "docentes",
@@ -94,11 +92,10 @@ const router = createRouter({
           meta: { title: "Docentes", requiresAuth: true },
         },
         {
-          path: "planes-estudio",
-          name: "planes-estudio",
-          component: () =>
-            import("../views/planes-estudio/PlanesEstudioView.vue"),
-          meta: { title: "Planes de Estudio", requiresAuth: true },
+          path: "aulas",
+          name: "aulas",
+          component: () => import("../views/aulas/AulasListView.vue"),
+          meta: { title: "Aulas", requiresAuth: true },
         },
         {
           path: "periodos",
@@ -119,8 +116,8 @@ const router = createRouter({
           meta: { title: "Programacion Academica", requiresAuth: true },
         },
         {
-          path: "horarios/generar",
-          name: "horarios-generar",
+          path: "horarios", 
+          name: "horarios",
           component: () => import("../views/horarios/HorariosView.vue"),
           meta: { title: "Generar Horarios", requiresAuth: true },
         },

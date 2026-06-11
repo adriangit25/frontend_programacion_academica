@@ -55,4 +55,9 @@ export const materiasApi = {
   delete(id: number) {
     return api.delete(`/programacion-academica/materias/${id}`);
   },
+  deleteNivel(plnId: number, nivel: number) {
+    return api.delete(
+      `/programacion-academica/materias/plan/${plnId}/nivel/${nivel}`,
+    );
+  },
 };
