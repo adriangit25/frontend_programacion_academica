@@ -76,8 +76,12 @@ const form = reactive({
 })
 
 async function handleLogin() {
-  if (!form.usu_usuario || !form.usu_contrasenia) {
-    error.value = 'Complete todos los campos'
+  if (!form.usu_usuario) {
+    error.value = 'Por favor ingrese su usuario'
+    return
+  }
+  if (!form.usu_contrasenia) {
+    error.value = 'Por favor ingrese su contraseña'
     return
   }
 

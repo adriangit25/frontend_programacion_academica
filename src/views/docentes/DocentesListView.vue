@@ -387,8 +387,18 @@ function closeModal() {
 }
 
 async function handleSubmit() {
-  if (!form.usu_id || !form.doc_dedicacion || !form.doc_horas_minimas || !form.doc_horas_maximas) {
-    formError.value = 'El usuario, dedicacion y horas son obligatorios'
+  if (!form.usu_id) {
+    formError.value = 'Debe seleccionar un usuario para registrar como docente'
+    return
+  }
+
+  if (!form.doc_dedicacion) {
+    formError.value = 'La dedicacion es obligatoria'
+    return
+  }
+
+  if (!form.doc_horas_minimas || !form.doc_horas_maximas) {
+    formError.value = 'Las horas minimas y maximas son obligatorias'
     return
   }
 
@@ -405,13 +415,21 @@ async function handleSubmit() {
   formError.value = ''
 
   try {
+    let docIdCreado: number | null = null
     if (editingDocente.value) {
       await docentesApi.update(editingDocente.value.doc_id, form)
     } else {
-      await docentesApi.create(form)
+      const res = await docentesApi.create(form)
+      docIdCreado = Number(res.data.docente.doc_id)
     }
     closeModal()
     await loadDocentes()
+
+    // Si es un docente nuevo, abrir directamente el modal de areas
+    if (docIdCreado) {
+      const docenteCreado = docentes.value.find(d => Number(d.doc_id) === docIdCreado)
+      if (docenteCreado) openAreaModal(docenteCreado)
+    }
   } catch (err: any) {
     formError.value = err.response?.data?.message || 'Error al guardar'
   } finally {

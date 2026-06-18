@@ -64,7 +64,7 @@
 
     <!-- Modal Crear/Editar -->
     <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-gray-800">{{ editingUser ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
           <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
@@ -95,9 +95,22 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
             <input v-model="form.usu_usuario" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ editingUser ? 'Contrasenia (dejar vacio para no cambiar)' : 'Contrasenia' }}</label>
-            <input v-model="form.usu_contrasenia" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ editingUser ? 'Contraseña (dejar vacio para no cambiar)' : 'Contraseña' }}</label>
+              <input v-model="form.usu_contrasenia" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ editingUser ? 'Confirmar Contraseña' : 'Confirmar Contraseña' }}</label>
+              <input v-model="confirmarContrasenia" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm" />
+            </div>
+          </div>
+          <div v-if="!editingUser">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+            <select v-model.number="rolSeleccionado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+              <option value="0">-- Seleccione un rol --</option>
+              <option v-for="rol in roles" :key="rol.rol_id" :value="rol.rol_id">{{ rol.rol_nombre }}</option>
+            </select>
           </div>
         </div>
 
@@ -139,8 +152,17 @@
 import { ref, reactive, onMounted } from 'vue'
 import { usuariosApi } from '../../api/usuarios.api'
 import type { Usuario, CreateUsuarioRequest } from '../../api/usuarios.api'
+import api from '../../api/axios'
+
+interface Rol {
+  rol_id: number
+  rol_nombre: string
+  rol_descripcion?: string
+  rol_estado: boolean
+}
 
 const usuarios = ref<Usuario[]>([])
+const roles = ref<Rol[]>([])
 const loading = ref(false)
 const saving = ref(false)
 const showModal = ref(false)
@@ -148,6 +170,8 @@ const showDeleteModal = ref(false)
 const formError = ref('')
 const editingUser = ref<Usuario | null>(null)
 const deletingUser = ref<Usuario | null>(null)
+const confirmarContrasenia = ref('')
+const rolSeleccionado = ref(0)
 
 const form = reactive<CreateUsuarioRequest>({
   usu_identificacion: '',
@@ -160,6 +184,7 @@ const form = reactive<CreateUsuarioRequest>({
 
 onMounted(() => {
   loadUsuarios()
+  loadRoles()
 })
 
 async function loadUsuarios() {
@@ -174,8 +199,19 @@ async function loadUsuarios() {
   }
 }
 
+async function loadRoles() {
+  try {
+    const response = await api.get('/programacion-academica/roles')
+    roles.value = response.data.filter((r: Rol) => r.rol_estado)
+  } catch (error) {
+    console.error('Error cargando roles:', error)
+  }
+}
+
 function openModal(usuario?: Usuario) {
   formError.value = ''
+  confirmarContrasenia.value = ''
+  rolSeleccionado.value = 0
   if (usuario) {
     editingUser.value = usuario
     form.usu_identificacion = usuario.usu_identificacion
@@ -199,6 +235,8 @@ function openModal(usuario?: Usuario) {
 function closeModal() {
   showModal.value = false
   editingUser.value = null
+  confirmarContrasenia.value = ''
+  rolSeleccionado.value = 0
 }
 
 async function handleSubmit() {
@@ -212,6 +250,16 @@ async function handleSubmit() {
     return
   }
 
+  if (form.usu_contrasenia && form.usu_contrasenia !== confirmarContrasenia.value) {
+    formError.value = 'Las contrasenias no coinciden'
+    return
+  }
+
+  if (!editingUser.value && !rolSeleccionado.value) {
+    formError.value = 'Debe seleccionar un rol para el nuevo usuario'
+    return
+  }
+
   saving.value = true
   formError.value = ''
 
@@ -219,7 +267,18 @@ async function handleSubmit() {
     if (editingUser.value) {
       await usuariosApi.update(editingUser.value.usu_id, form)
     } else {
-      await usuariosApi.create(form)
+      const res = await usuariosApi.create(form)
+      const nuevoUsuId = Number(res.data.usuario.usu_id)
+
+      // Asignar el rol seleccionado al nuevo usuario
+      try {
+        await api.post('/programacion-academica/usuario-rol', {
+          usu_id: nuevoUsuId,
+          rol_id: Number(rolSeleccionado.value),
+        })
+      } catch (rolErr: any) {
+        console.error('Error asignando rol:', rolErr)
+      }
     }
     closeModal()
     await loadUsuarios()

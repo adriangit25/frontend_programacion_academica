@@ -571,6 +571,12 @@ async function handleSubmitMateria() {
     materiaError.value = 'El codigo, nombre, nivel y area son obligatorios'
     return
   }
+
+  if (!materiaForm.mat_horas_docencia || materiaForm.mat_horas_docencia <= 0) {
+    materiaError.value = 'Las horas de docencia son obligatorias y deben ser mayores a 0'
+    return
+  }
+  
   materiaForm.pln_id = Number(selectedPlan.value?.pln_id) || 0
   materiaForm.mat_total_horas = totalHorasCalculado.value
   materiaForm.mat_estudiantes_estimado = 0

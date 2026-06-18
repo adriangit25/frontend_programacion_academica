@@ -56,6 +56,17 @@
           </button>
         </div>
       </div>
+      <!-- Botón exportar -->
+      <div class="flex justify-end mt-3">
+        <button
+          @click="exportarExcel"
+          :disabled="!filters.per_id || !filters.car_id"
+          class="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg text-sm hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <i class="pi pi-file-excel"></i>
+          Exportar Horarios Excel
+        </button>
+      </div>
     </div>
 
     <!-- TAB 1: Grilla de Horarios -->
@@ -102,9 +113,12 @@
           <option v-for="docente in docentes" :key="docente.doc_id" :value="docente.doc_id">{{ docente.usu_apellidos }} {{ docente.usu_nombres }}</option>
         </select>
       </div>
-      <div v-if="loadingDocente" class="text-center py-8 text-gray-400">Cargando...</div>
-      <div v-else-if="selectedDocId && horarioDocente.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">El docente no tiene horarios en este periodo</div>
-      <div v-else-if="horarioDocente.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div v-if="!filters.per_id" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">
+            Seleccione un periodo academico en los filtros superiores para ver el horario del docente
+          </div>
+          <div v-else-if="loadingDocente" class="text-center py-8 text-gray-400">Cargando...</div>
+          <div v-else-if="selectedDocId && horarioDocente.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">El docente no tiene horarios en este periodo</div>
+          <div v-else-if="horarioDocente.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full border-collapse" style="table-layout: fixed;">
             <thead>
@@ -885,6 +899,27 @@ async function handleConfirmarIA() {
     await loadData()
   } catch (err: any) { iaError.value = err.response?.data?.message || 'Error al confirmar' }
   finally { confirmandoIA.value = false }
+}
+
+async function exportarExcel() {
+  if (!filters.per_id || !filters.car_id) return
+  try {
+    const response = await api.get(
+      `/programacion-academica/exportar-horarios/${filters.per_id}/${filters.car_id}`,
+      { responseType: 'blob' }
+    )
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `horarios_${filters.per_id}_${filters.car_id}.xlsx`
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('Error exportando:', err)
+  }
 }
 
 function handleLimpiarIA() { iaResultados.value = []; iaConfirmado.value = ''; iaError.value = ''; pendientesIA.value = {} }
