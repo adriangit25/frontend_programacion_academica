@@ -51,4 +51,9 @@ export const docentesApi = {
   delete(id: number) {
     return api.delete(`/programacion-academica/docentes/${id}`);
   },
+  getByUsuario(usuId: number) {
+    return api.get<Docente>(
+      `/programacion-academica/docentes/usuario/${usuId}`,
+    );
+  },
 };

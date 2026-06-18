@@ -26,7 +26,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Periodo</label>
           <select v-model.number="filters.per_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
             <option value="0">-- Seleccione --</option>
-            <option v-for="periodo in periodos" :key="periodo.per_id" :value="periodo.per_id">{{ periodo.per_nombre }}</option>
+            <option v-for="periodo in periodosActivos" :key="periodo.per_id" :value="periodo.per_id">{{ periodo.per_nombre }}</option>
           </select>
         </div>
         <div>
@@ -113,12 +113,12 @@
           <option v-for="docente in docentes" :key="docente.doc_id" :value="docente.doc_id">{{ docente.usu_apellidos }} {{ docente.usu_nombres }}</option>
         </select>
       </div>
-          <div v-if="!filters.per_id" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">
-            Seleccione un periodo academico en los filtros superiores para ver el horario del docente
-          </div>
-          <div v-else-if="loadingDocente" class="text-center py-8 text-gray-400">Cargando...</div>
-          <div v-else-if="selectedDocId && horarioDocente.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">El docente no tiene horarios en este periodo</div>
-          <div v-else-if="horarioDocente.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div v-if="!filters.per_id" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">
+        Seleccione un periodo academico en los filtros superiores para ver el horario del docente
+      </div>
+      <div v-else-if="loadingDocente" class="text-center py-8 text-gray-400">Cargando...</div>
+      <div v-else-if="selectedDocId && horarioDocente.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">El docente no tiene horarios en este periodo</div>
+      <div v-else-if="horarioDocente.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full border-collapse" style="table-layout: fixed;">
             <thead>
@@ -202,18 +202,77 @@
         <!-- Tarjetas por nivel+paralelo -->
         <div class="space-y-4 mb-6">
           <div v-for="combo in combinacionesIA" :key="`${combo.nivel}-${combo.par_id}`" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="bg-gray-50 border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-xs font-medium">Nivel {{ combo.nivel }}</span>
-                <span class="text-sm font-medium text-gray-800">Paralelo {{ combo.par_nombre }}</span>
+            <div class="bg-gray-50 border-b border-gray-200 px-6 py-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="bg-blue-900 text-white px-2 py-0.5 rounded text-xs font-medium">Nivel {{ combo.nivel }}</span>
+                  <span class="text-sm font-medium text-gray-800">Paralelo {{ combo.par_nombre }}</span>
+                </div>
+                <div v-if="getResultadoGrupo(combo.nivel, combo.par_id)" class="flex items-center gap-2">
+                  <span v-if="combosYaGuardados.has(`${combo.nivel}-${combo.par_id}`)" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                    <i class="pi pi-save mr-1"></i>Horario guardado - Editando
+                  </span>
+                  <template v-else>
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                      <i class="pi pi-check mr-1"></i>Generado - Fitness: {{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.fitness?.toFixed(1) }}
+                    </span>
+                    <button @click="toggleDetalles(combo)" class="text-xs text-blue-700 hover:text-blue-900 underline transition">
+                      {{ detallesAbiertos.has(`${combo.nivel}-${combo.par_id}`) ? 'Ocultar detalles' : 'Ver detalles' }}
+                    </button>
+                  </template>
+                  <button
+                    v-if="combosYaGuardados.has(`${combo.nivel}-${combo.par_id}`)"
+                    @click="regenerarDesdeCero(combo)"
+                    class="text-xs text-gray-500 hover:text-red-600 underline transition"
+                  >
+                    Regenerar desde cero
+                  </button>
+                </div>
               </div>
-              <div v-if="getResultadoGrupo(combo.nivel, combo.par_id)" class="flex items-center gap-2">
-                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                  <i class="pi pi-check mr-1"></i>Generado - Fitness: {{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.fitness?.toFixed(1) }}
-                </span>
+
+              <!-- Panel de detalles del fitness -->
+              <div
+                v-if="detallesAbiertos.has(`${combo.nivel}-${combo.par_id}`) && getResultadoGrupo(combo.nivel, combo.par_id)"
+                class="mt-3 pt-3 border-t border-gray-200 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs"
+              >
+                <div>
+                  <p class="text-gray-400 uppercase font-semibold mb-1">Tiempo de generación</p>
+                  <p class="text-gray-700 font-medium">{{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.tiempo_ejecucion }}s</p>
+                </div>
+                <div>
+                  <p class="text-gray-400 uppercase font-semibold mb-1">Fitness inicial → final</p>
+                  <p class="text-gray-700 font-medium">
+                    {{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.fitness_inicial?.toFixed(1) }} → {{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.fitness?.toFixed(1) }}
+                  </p>
+                </div>
+                <div>
+                  <p class="text-gray-400 uppercase font-semibold mb-1">Población / Generaciones</p>
+                  <p class="text-gray-700 font-medium">{{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.poblacion }} / {{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.generaciones }}</p>
+                </div>
+                <div>
+                  <p class="text-gray-400 uppercase font-semibold mb-1">Docentes utilizados</p>
+                  <p class="text-gray-700 font-medium">
+                    {{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.docentes_utilizados }}
+                    <span v-if="getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.bloques_sin_docente > 0" class="text-amber-600">
+                      ({{ getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.bloques_sin_docente }} bloques sin asignar)
+                    </span>
+                  </p>
+                </div>
+                <div class="col-span-2 md:col-span-4">
+                  <p class="text-gray-400 uppercase font-semibold mb-1">Restricciones (puntos de penalización)</p>
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      v-for="(valor, key) in getResultadoGrupo(combo.nivel, combo.par_id)?.resultado?.desglose_penalizaciones"
+                      :key="key"
+                      :class="['px-2 py-1 rounded-full', valor > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700']"
+                    >
+                      {{ LABELS_RESTRICCION[key] || key }}: {{ valor }}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="p-6">
+            <div class="p-6" v-if="!combosYaGuardados.has(`${combo.nivel}-${combo.par_id}`)">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="space-y-3">
                   <h4 class="text-xs font-semibold text-gray-500 uppercase">Rango de Horas</h4>
@@ -502,6 +561,8 @@ const nivelesDisponibles = ref<number[]>([])
 const paralelosDisponibles = ref<string[]>([])
 const selectedDocId = ref(0)
 
+const periodosActivos = computed(() => periodos.value.filter(p => p.per_estado))
+
 // IA
 const iaResultados = ref<Array<{ nivel: number; par_id: number; par_nombre: string; resultado: any }>>([])
 const generandoIA = ref(false)
@@ -510,6 +571,29 @@ const iaError = ref('')
 const iaConfirmado = ref('')
 const labsGlobales = ref<number[]>([])
 const gruposConfig = ref<Record<string, { hora_inicio: number; hora_fin: number; duracion_min: number; duracion_max: number; dias_permitidos: number[] }>>({})
+
+// Combos que ya tienen horario IA confirmado en BD (carga automatica en modo edicion)
+const combosYaGuardados = ref<Set<string>>(new Set())
+
+// Panel de detalles/metricas del fitness por combo
+const detallesAbiertos = ref<Set<string>>(new Set())
+
+function toggleDetalles(combo: { nivel: number; par_id: number }) {
+  const key = `${combo.nivel}-${combo.par_id}`
+  if (detallesAbiertos.value.has(key)) detallesAbiertos.value.delete(key)
+  else detallesAbiertos.value.add(key)
+}
+
+const LABELS_RESTRICCION: Record<string, string> = {
+  cruce_docentes: 'Cruce de docentes',
+  cruce_docentes_previos: 'Cruce con otros paralelos',
+  cruce_estudiantes: 'Cruce de estudiantes',
+  carga_horaria_docentes: 'Carga horaria fuera de rango',
+  dias_diferentes: 'Materia repetida el mismo día',
+  distribucion_horas: 'Distribución de horas',
+  preferencia_horario: 'Preferencia de horario matutino',
+  carga_diaria: 'Sobrecarga diaria',
+}
 
 // Editar bloque IA
 const showEditarBloqueModal = ref(false)
@@ -603,6 +687,64 @@ function initGrupoConfig(key: string) {
   if (!gruposConfig.value[key]) {
     gruposConfig.value[key] = { hora_inicio: 7, hora_fin: 21, duracion_min: 2, duracion_max: 3, dias_permitidos: [1, 2, 3, 4, 5] }
   }
+}
+
+// Carga automatica de horarios IA ya confirmados en BD, para entrar directo en modo edicion
+async function cargarHorariosGuardadosIA() {
+  if (!filters.per_id || !filters.car_id) return
+  try {
+    const response = await horariosApi.getHorarioCompleto(Number(filters.per_id), Number(filters.car_id))
+    const generadosIA = response.data.filter(h => h.hor_observaciones === 'Generado por IA')
+
+    const grupos = new Map<string, HorarioCompleto[]>()
+    for (const h of generadosIA) {
+      const key = `${h.pra_nivel}-${h.par_id}`
+      if (!grupos.has(key)) grupos.set(key, [])
+      grupos.get(key)!.push(h)
+    }
+
+    const nuevosResultados: typeof iaResultados.value = []
+    combosYaGuardados.value = new Set()
+
+    for (const [key, items] of grupos) {
+      const [nivelStr, parIdStr] = key.split('-')
+      const nivel = Number(nivelStr)
+      const parId = Number(parIdStr)
+      const parNombre = items[0].par_nombre
+
+      const horariosFormato = items.map(h => ({
+        pra_id: h.pra_id,
+        dia_id: h.dia_id,
+        dia_nombre: h.dia_nombre,
+        blq_id_inicio: h.blq_id_inicio,
+        blq_id_fin: h.blq_id_fin,
+        hora_inicio: h.blq_hora_inicio,
+        hora_fin: h.blq_hora_fin,
+        duracion: h.hor_duracion,
+        mat_nombre: h.mat_nombre,
+        doc_id: h.doc_id,
+        doc_nombre: h.docente_nombre?.trim() || 'Sin asignar',
+        aul_id: h.aul_id,
+        aul_sugerida: h.aul_nombre
+          ? { aul_id: h.aul_id, aul_nombre: h.aul_nombre, aul_codigo: h.aul_codigo, aul_capacidad: 0 }
+          : null,
+      }))
+
+      nuevosResultados.push({ nivel, par_id: parId, par_nombre: parNombre, resultado: { horarios: horariosFormato } })
+      combosYaGuardados.value.add(key)
+    }
+
+    iaResultados.value = nuevosResultados
+  } catch (error) {
+    console.error('Error cargando horarios guardados:', error)
+  }
+}
+
+function regenerarDesdeCero(combo: { nivel: number; par_id: number; par_nombre: string }) {
+  const key = `${combo.nivel}-${combo.par_id}`
+  combosYaGuardados.value.delete(key)
+  const idx = iaResultados.value.findIndex(r => r.nivel === combo.nivel && r.par_id === combo.par_id)
+  if (idx > -1) iaResultados.value.splice(idx, 1)
 }
 
 // Drag & Drop funciones
@@ -761,6 +903,7 @@ async function onCarreraChange() {
   programacion.value = []; todaProgramacion.value = []; horarioCompleto.value = []
   nivelesDisponibles.value = []; paralelosDisponibles.value = []
   iaResultados.value = []; gruposConfig.value = {}; pendientesIA.value = {}
+  combosYaGuardados.value = new Set(); detallesAbiertos.value = new Set()
 
   if (!filters.per_id || !filters.car_id) return
 
@@ -772,6 +915,7 @@ async function onCarreraChange() {
     for (const p of progRes.data) {
       if (p.par_id && p.par_nombre) initGrupoConfig(`${p.pra_nivel}-${p.par_id}`)
     }
+    await cargarHorariosGuardadosIA()
   } catch (error) { console.error('Error cargando programacion:', error) }
 }
 
@@ -855,7 +999,7 @@ async function generarParaCombo(combo: { nivel: number; par_id: number; par_nomb
 async function handleGenerarIA() {
   if (!filters.per_id || !filters.car_id || combinacionesIA.value.length === 0) return
   generandoIA.value = true; iaError.value = ''; iaResultados.value = []; iaConfirmado.value = ''
-  pendientesIA.value = {}
+  pendientesIA.value = {}; combosYaGuardados.value = new Set(); detallesAbiertos.value = new Set()
   try {
     for (const combo of combinacionesIA.value) {
       try { const resultado = await generarParaCombo(combo); iaResultados.value.push(resultado) }
@@ -877,6 +1021,8 @@ async function handleGenerarGrupo(combo: { nivel: number; par_id: number; par_no
     // Limpiar pendientes de este grupo
     const key = `${combo.nivel}-${combo.par_id}`
     pendientesIA.value[key] = []
+    combosYaGuardados.value.delete(key)
+    detallesAbiertos.value.delete(key)
   } catch (err: any) { iaError.value = err.response?.data?.message || 'Error al generar' }
   finally { generandoIA.value = false }
 }
@@ -887,7 +1033,7 @@ async function handleRegenerarGrupo(combo: { nivel: number; par_id: number; par_
   await handleGenerarGrupo(combo)
 }
 
-async function handleRegenerarIA() { iaResultados.value = []; pendientesIA.value = {}; await handleGenerarIA() }
+async function handleRegenerarIA() { iaResultados.value = []; pendientesIA.value = {}; combosYaGuardados.value = new Set(); detallesAbiertos.value = new Set(); await handleGenerarIA() }
 
 async function handleConfirmarIA() {
   if (iaResultados.value.length === 0) return
@@ -897,6 +1043,7 @@ async function handleConfirmarIA() {
     const response = await horariosApi.confirmarIA({ per_id: Number(filters.per_id), car_id: Number(filters.car_id), horarios: todosLosHorarios })
     iaConfirmado.value = response.data.message
     await loadData()
+    await cargarHorariosGuardadosIA()
   } catch (err: any) { iaError.value = err.response?.data?.message || 'Error al confirmar' }
   finally { confirmandoIA.value = false }
 }
@@ -922,5 +1069,5 @@ async function exportarExcel() {
   }
 }
 
-function handleLimpiarIA() { iaResultados.value = []; iaConfirmado.value = ''; iaError.value = ''; pendientesIA.value = {} }
+function handleLimpiarIA() { iaResultados.value = []; iaConfirmado.value = ''; iaError.value = ''; pendientesIA.value = {}; combosYaGuardados.value = new Set(); detallesAbiertos.value = new Set() }
 </script>

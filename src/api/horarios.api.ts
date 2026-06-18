@@ -21,18 +21,27 @@ export interface Horario {
 
 export interface HorarioCompleto {
   hor_id: number;
+  pra_id: number;
+  dia_id: number;
+  blq_id_inicio: number;
+  blq_id_fin: number;
+  aul_id: number | null;
+  hor_observaciones: string | null;
   dia_nombre: string;
   dia_orden: number;
   dia_abreviatura: string;
   blq_hora_inicio: string;
   blq_hora_fin: string;
   blq_orden: number;
+  hor_duracion: number;
   mat_codigo: string;
   mat_nombre: string;
   pra_nivel: number;
+  par_id: number;
   pra_nrc: string | null;
+  doc_id: number | null;
   par_nombre: string;
-  docente_nombre: string | null;
+  docente_nombre: string;
   aul_nombre: string | null;
   aul_codigo: string | null;
   pra_modalidad: string;
@@ -44,6 +53,7 @@ export interface HorarioDocente {
   dia_orden: number;
   blq_hora_inicio: string;
   blq_hora_fin: string;
+  hor_duracion: number;
   mat_codigo: string;
   mat_nombre: string;
   pra_nivel: number;

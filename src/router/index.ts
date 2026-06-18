@@ -35,7 +35,7 @@ const router = createRouter({
           meta: { title: "Roles", requiresAuth: true },
         },
         {
-          path: "asignar-rol", 
+          path: "asignar-rol",
           name: "asignar-rol",
           component: () => import("../views/usuario-rol/AsignarRolView.vue"),
           meta: { title: "Asignar Roles", requiresAuth: true },
@@ -47,7 +47,7 @@ const router = createRouter({
           meta: { title: "Menus", requiresAuth: true },
         },
         {
-          path: "asignar-menu-rol", 
+          path: "asignar-menu-rol",
           name: "asignar-menu-rol",
           component: () => import("../views/rol-menu/AsignarMenuRolView.vue"),
           meta: { title: "Asignar Menus", requiresAuth: true },
@@ -116,10 +116,22 @@ const router = createRouter({
           meta: { title: "Programacion Academica", requiresAuth: true },
         },
         {
-          path: "horarios", 
+          path: "horarios",
           name: "horarios",
           component: () => import("../views/horarios/HorariosView.vue"),
           meta: { title: "Generar Horarios", requiresAuth: true },
+        },
+        {
+          path: "mi-horario",
+          name: "mi-horario",
+          component: () => import("../views/docentes/MiHorarioView.vue"),
+          meta: { title: "Mi Horario", requiresAuth: true },
+        },
+        {
+          path: "carga-docente",
+          name: "carga-docente",
+          component: () => import("../views/reportes/CargaDocenteView.vue"),
+          meta: { title: "Carga Docente", requiresAuth: true },
         },
       ],
     },
