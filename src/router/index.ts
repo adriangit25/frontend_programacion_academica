@@ -133,6 +133,19 @@ const router = createRouter({
           component: () => import("../views/reportes/CargaDocenteView.vue"),
           meta: { title: "Carga Docente", requiresAuth: true },
         },
+        {
+          path: "mi-bibliografia",
+          name: "mi-bibliografia",
+          component: () => import("../views/docentes/BibliografiaView.vue"),
+          meta: { title: "Mi Bibliografía", requiresAuth: true },
+        },
+        {
+          path: "reporte-bibliografia",
+          name: "reporte-bibliografia",
+          component: () =>
+            import("../views/reportes/BibliografiaCoordinadorView.vue"),
+          meta: { title: "Reporte Bibliografía", requiresAuth: true },
+        },
       ],
     },
   ],
